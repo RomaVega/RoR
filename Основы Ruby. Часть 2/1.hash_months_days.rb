@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Сделать хеш, содержащий месяцы и
 # количество дней в месяце.
 # В цикле выводить те месяцы,
@@ -18,7 +19,5 @@ months_2024_hash = {
 }
 
 months_2024_hash.each do |month, days|
-  if days >= 30
-  puts "#{month}"
-  end
+  puts month if days >= 30
 end
