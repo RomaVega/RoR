@@ -39,6 +39,7 @@ class Train
       'Cannot attach wagons while train is moving!'
     end
   end
+
   def detach_wagons
     if @speed.zero? && @wagons.positive?
       @wagons -= 1
@@ -72,6 +73,7 @@ class Train
       puts "Поезд уже на конечной станции маршрута #{current_station.name}."
     end
   end
+
   def move_backward
     if previous_station
       current_station.dispatch(self)
@@ -87,9 +89,11 @@ class Train
   def previous_station
     @route.stations[@current_station_index - 1] if @route && @current_station_index > 0
   end
+
   def current_station
     @route.stations[@current_station_index]
   end
+
   def next_station
     @route.stations[@current_station_index + 1] if @route && @current_station_index < @route.stations.length - 1
   end

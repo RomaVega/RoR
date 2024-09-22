@@ -1,5 +1,6 @@
 class Station
   attr_reader :name, :trains
+
   # Имеет название, которое указывается при ее создании:
   def initialize(station_name)
     @name = station_name
