@@ -22,4 +22,9 @@ class Route
       puts "Station #{station.name} cannot be deleted or is not found in the route."
     end
   end
+
+  def list_stations
+    puts 'Станции маршрута:'
+    @stations.each { |station| puts station.name}
+  end
 end

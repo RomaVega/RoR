@@ -2,6 +2,8 @@
 require_relative 'route'
 # Чтобы обновлять списки поездов на станции:
 require_relative 'station'
+# Чтобы добавлять пассажирские и грузовые вагоны к поезду:
+require_relative 'wagon'
 
 class Train
   # Может возвращать номер вагона, тип, кол-во вагонов и текущую скорость:
@@ -9,13 +11,13 @@ class Train
 
   # Имеет номер (произвольная строка) и тип (грузовой, пассажирский) и количество вагонов,
   # эти данные указываются при создании экземпляра класса:
-  def initialize(number, type, wagons)
+  def initialize(number, type)
     @number = number
     @type = type
-    @wagons = wagons
     @speed = 0
+    @wagons = []
   end
-
+  
   # Может набирать скорость:
   def speed_up(value)
     @speed += value
@@ -27,22 +29,32 @@ class Train
     @speed = 0
     puts 'Train stopped'
   end
-  
+
   # Может прицеплять/отцеплять вагоны
   # (по одному вагону за операцию, метод просто увеличивает или уменьшает количество вагонов).
   # Прицепка/отцепка вагонов может осуществляться только если поезд не движется:
-  def add_wagon
+  def add_wagon(wagon)
     if @speed.zero?
-      @wagons += 1
+      if wagon.type == @type
+        @wagons << wagon
+        puts "Wagon connected. Total number of #{@type} wagons is #{@wagons.size}"
+      else
+        puts 'Type of wagon doesnt match the type of the train.'
+      end
       "Train length (number of wagons) increased by 1. Total: #{@wagons}"
     else
       'Cannot attach wagons while train is moving!'
     end
   end
 
-  def detach_wagons
-    if @speed.zero? && @wagons.positive?
-      @wagons -= 1
+  def detach_wagons(wagon)
+    if @speed.zero?
+      if @wagons.include?(wagon)
+        @wagons.delete(wagon)
+        puts "Wagon disconnected.  Total number of #{@type} wagons is #{@wagons.size}"
+      else
+        'Such wagon is not found on this train.'
+      end
       "Train length (number of wagons) reduced by 1. Total: #{@wagons}"
     else
       'Cannot detach wagons, train is either moving or not attached!'
@@ -85,6 +97,9 @@ class Train
     end
   end
 
+  private
+
+  # Метод сделан приватным так как используется только внутри класса для перемещения по маршруту. 
   # Возвращать предыдущую станцию, текущую, следующую, на основе маршрута:
   def previous_station
     @route.stations[@current_station_index - 1] if @route && @current_station_index > 0

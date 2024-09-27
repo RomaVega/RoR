@@ -10,18 +10,21 @@ class Station
   # Может принимать поезда (по одному за раз):
   def let_train_in(train)
     @trains << train
+    puts "Поезд №#{train.number} прибыл на станцию #{@name}."
   end
 
   # Может отправлять поезда
   # (по одному за раз, при этом, поезд удаляется из списка поездов, находящихся на станции):
   def dispatch(train)
     @trains.delete(train)
+    puts "Поезд №#{train.number} прибыл на станцию #{@name}."
   end
 
   # Может возвращать список всех поездов на станции, находящиеся в текущий момент:
   def list_all_trains
-    puts "Поезда на станции #{@name}:"
-    @trains.each { |train| puts "Поезд №#{train.number}, тип: #{train.type}, вагонов: #{train.wagons}" }
+    @trains.each do |train|
+    puts "Поезда на станции #{@name}, тип: #{train.type}, вагонов: #{train.wagons.size}"
+    end
   end
 
   # Может возвращать список поездов на станции по типу (см. ниже): кол-во грузовых, пассажирских:
@@ -30,5 +33,4 @@ class Station
     puts "Поезда на станции #{@name} типа '#{type}':"
     trains_by_type.each { |train| puts "Поезд №#{train.number}" }
   end
-
 end
