@@ -24,7 +24,7 @@ class Route
   end
 
   def list_stations
-    puts 'Станции маршрута:'
-    @stations.each { |station| puts station.name}
+    puts 'List of stations on the selected route:'
+    @stations.each { |station| puts station.name }
   end
 end
