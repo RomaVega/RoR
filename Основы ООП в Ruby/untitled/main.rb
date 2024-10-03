@@ -75,12 +75,12 @@ class Main
       type = 'passenger'
       train = Train.new(number, type)
       @trains << train
-      puts "#{type} train №#{number} is created."
+      puts "#{type} train №#{number} was created."
     when 2
       type = 'cargo'
       train = Train.new(number, type)
       @trains << train
-      puts "#{type} train №#{number} is created."
+      puts "#{type} train №#{number} was created."
     else
       puts 'Wrong choice. Train was not created.'
     end
@@ -132,7 +132,8 @@ class Main
 
     when 3
       # Вывод списка маршрутов для выбора, откуда удалить станцию:
-      puts 'Chose the route from which would you like to delete a station:'
+      puts 'Chose the route from which would you like to delete a station'
+      puts '(you cannot delete first and last stations):'
       @routes.each_with_index do |route, index|
         puts "#{index} - route from #{route.stations.first.name} to #{route.stations.last.name}"
       end
@@ -146,6 +147,40 @@ class Main
       puts
       puts "Station #{station} deleted."
     end
+  end
+
+  def assign_route
+    # Назначать маршрут поезду
+    if @trains.empty?
+      puts 'There are no trains available. Create the train first!'
+      return
+    end
+    if @routes.empty?
+      puts 'There are no routes available. Create the route first!'
+      return
+    end
+    puts 'Pick a train to which you would like to assign a route:'
+    @trains.each_with_index do |train, index|
+      puts "#{index} - #{train.type} train №#{train.number}"
+    end
+    train_number = gets.chomp.to_i
+    train = @trains[train_number]
+    if train.nil?
+      puts 'Wrong choice. Chose an existing train from the list.'
+      return
+    end
+    puts "Chose the route you want to assign to the train №#{train.number}:"
+    @routes.each_with_index do |route, index|
+      puts "#{index} - the route from #{route.stations.first.name} to #{route.stations.last.name}"
+    end
+    route_index = gets.chomp.to_i
+    route = @routes[route_index]
+    if route.nil?
+      puts 'Wrong choice. Chose an existing route from the list.'
+      return
+    end
+    puts "Route from #{route.stations.first.name} to #{route.stations.last.name} was assigned to the #{train.type} train №#{train.number}."
+    train.accept_route(route)
   end
 end
 main = Main.new

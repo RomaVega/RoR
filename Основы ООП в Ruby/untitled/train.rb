@@ -69,7 +69,6 @@ class Train
     @current_station_index = 0
     # Поезд, прибывший на станцию, добавляется в её список припаркованных в ней поездов:
     current_station.let_train_in(self)
-    puts "Маршрут принят. Поезд назодится на станции #{current_station.name}"
   end
 
   # Может перемещаться между станциями, указанными в маршруте.
@@ -80,9 +79,9 @@ class Train
       current_station.dispatch(self)
       @current_station_index += 1
       current_station.let_train_in(self)
-      puts "Поезд прибыл на станцию #{current_station.name}."
+      puts "Train has arrived on station: #{current_station.name}."
     else
-      puts "Поезд уже на конечной станции маршрута #{current_station.name}."
+      puts "Train is already on the last station of the route: #{current_station.name}."
     end
   end
 
@@ -91,9 +90,9 @@ class Train
       current_station.dispatch(self)
       @current_station_index -= 1
       current_station.let_train_in(self)
-      puts "Поезд прибыл на станцию #{current_station.name}."
+      puts "Train has arrived on station: #{current_station.name}."
     else
-      puts 'Поезд находится на начальной станции маршрута.'
+      puts 'Train is already on the first station of the route.'
     end
   end
 
