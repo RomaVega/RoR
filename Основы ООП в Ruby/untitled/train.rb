@@ -37,13 +37,13 @@ class Train
     if @speed.zero?
       if wagon.type == @type
         @wagons << wagon
-        puts "Wagon connected. Total number of #{@type} wagons is #{@wagons.size}"
+        puts "Wagon #{wagon.type} added ✓"
+        puts "Total number of #{@type} wagons is #{@wagons.size}"
       else
         puts 'Type of wagon doesnt match the type of the train.'
       end
-      "Train length (number of wagons) increased by 1. Total: #{@wagons}"
     else
-      'Cannot attach wagons while train is moving!'
+      puts 'Cannot attach wagons while train is moving!'
     end
   end
 
@@ -51,7 +51,8 @@ class Train
     if @speed.zero?
       if @wagons.include?(wagon)
         @wagons.delete(wagon)
-        puts "Wagon disconnected.  Total number of #{@type} wagons is #{@wagons.size}"
+        puts 'Wagon detached ✓'
+        puts "Wagons total: #{@wagons.size}"
       else
         'Such wagon is not found on this train.'
       end
@@ -90,7 +91,7 @@ class Train
       current_station.dispatch(self)
       @current_station_index -= 1
       current_station.let_train_in(self)
-      puts "Train has arrived on station: #{current_station.name}."
+      puts "Train has arrived to station: #{current_station.name}."
     else
       puts 'Train is already on the first station of the route.'
     end
@@ -98,7 +99,7 @@ class Train
 
   private
 
-  # Метод сделан приватным так как используется только внутри класса для перемещения по маршруту. 
+  # Метод сделан приватным так как используется только внутри класса для перемещения по маршруту.
   # Возвращать предыдущую станцию, текущую, следующую, на основе маршрута:
   def previous_station
     @route.stations[@current_station_index - 1] if @route && @current_station_index > 0

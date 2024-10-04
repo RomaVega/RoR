@@ -17,14 +17,17 @@ class Route
   def delete_station(station)
     if station != @stations.first && station != @stations.last && @stations.include?(station)
       @stations.delete(station)
+      puts
       puts "Station #{station.name} deleted from the route."
     else
-      puts "Station #{station.name} cannot be deleted or is not found in the route."
+      puts "Station #{station} cannot be deleted or is not found in the route."
     end
   end
 
   def list_stations
     puts 'List of stations on the selected route:'
-    @stations.each { |station| puts station.name }
+    @stations.each_with_index do |station, index|
+      puts "#{index} - #{station.name}"
+    end
   end
 end

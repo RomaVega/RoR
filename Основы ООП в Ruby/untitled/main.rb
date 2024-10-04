@@ -11,6 +11,16 @@ class Main
     @routes = []
   end
 
+  def select_from_collection(collection)
+    # Выбор по индексу, а не по именам
+    loop do
+      index = gets.chomp.to_i
+      return collection[index] if index >= 0 && index < collection.length
+
+      puts 'Wrong choice. Please chose a number from the list!'
+    end
+  end
+
   def start
     loop do
       puts "\nChose an action:"
@@ -58,7 +68,7 @@ class Main
     name = gets.chomp
     station = Station.new(name)
     @stations << station
-    puts "Station #{name} was created."
+    puts "Station #{name} was created ✓"
   end
 
   def create_train
@@ -75,12 +85,12 @@ class Main
       type = 'passenger'
       train = Train.new(number, type)
       @trains << train
-      puts "#{type} train №#{number} was created."
+      puts "#{type} train №#{number} was created ✓"
     when 2
       type = 'cargo'
       train = Train.new(number, type)
       @trains << train
-      puts "#{type} train №#{number} was created."
+      puts "#{type} train №#{number} was created ✓"
     else
       puts 'Wrong choice. Train was not created.'
     end
@@ -132,20 +142,37 @@ class Main
 
     when 3
       # Вывод списка маршрутов для выбора, откуда удалить станцию:
-      puts 'Chose the route from which would you like to delete a station'
-      puts '(you cannot delete first and last stations):'
+      if @routes.empty?
+        puts 'No available route. Create a route first!'
+        return
+      end
+
+      puts 'Chose the route from which would you like to delete a station:'
       @routes.each_with_index do |route, index|
         puts "#{index} - route from #{route.stations.first.name} to #{route.stations.last.name}"
       end
       route_index = gets.chomp.to_i
       puts
       route = @routes[route_index]
-      route.list_stations
-      puts 'Type the name of the station that you would like to delete:'
-      name = gets.chomp
-      station.delete_station(name)
-      puts
-      puts "Station #{station} deleted."
+
+      if route.stations.length <= 2
+        puts 'No intermediate stations to delete on this route.'
+        return
+      end
+
+      if route == route.stations.first || route == route.stations.last
+        puts 'You cannot delete the first or last station'
+        return
+      end
+
+      puts 'Chose the station that you would like to delete:'
+      route.stations.each_with_index do |station, index|
+        next if index == 0 || index == route.stations.length - 1
+        puts "#{index} - #{station.name}"
+      end
+
+      station = select_from_collection(route.stations)
+      route.delete_station(station)
     end
   end
 
@@ -155,32 +182,122 @@ class Main
       puts 'There are no trains available. Create the train first!'
       return
     end
+
     if @routes.empty?
       puts 'There are no routes available. Create the route first!'
       return
     end
+
     puts 'Pick a train to which you would like to assign a route:'
     @trains.each_with_index do |train, index|
       puts "#{index} - #{train.type} train №#{train.number}"
     end
+
     train_number = gets.chomp.to_i
     train = @trains[train_number]
     if train.nil?
       puts 'Wrong choice. Chose an existing train from the list.'
       return
     end
+
     puts "Chose the route you want to assign to the train №#{train.number}:"
     @routes.each_with_index do |route, index|
       puts "#{index} - the route from #{route.stations.first.name} to #{route.stations.last.name}"
     end
+
     route_index = gets.chomp.to_i
     route = @routes[route_index]
+
     if route.nil?
       puts 'Wrong choice. Chose an existing route from the list.'
       return
     end
-    puts "Route from #{route.stations.first.name} to #{route.stations.last.name} was assigned to the #{train.type} train №#{train.number}."
+
+    puts "Route from #{route.stations.first.name} to #{route.stations.last.name} was assigned to the #{train.type} train №#{train.number} ✓"
     train.accept_route(route)
+  end
+
+  def add_wagon
+    # Добавлять вагоны к поезду
+    if @trains.empty?
+      puts 'There are no trains available. Create the train first!'
+    else
+      puts 'Pick the train to which you would like to add a wagon:'
+      @trains.each_with_index do |train, index|
+        puts "#{index} - #{train.type} train №#{train.number}"
+      end
+    end
+
+    train_choice = gets.chomp.to_i
+
+    if @trains[train_choice].nil?
+      puts 'Wrong choice.'
+      return
+    end
+
+    case @trains[train_choice].type
+    when 'passenger'
+      wagon = PassengerWagon.new
+    when 'cargo'
+      wagon = CargoWagon.new
+    else
+      puts 'Unknown type of train!'
+      return
+    end
+    @trains[train_choice].add_wagon(wagon)
+  end
+  
+  def detach_wagon
+    # Отцеплять вагоны от поезда
+    if @trains.empty?
+      puts 'There are no trains available. Create the train first!'
+    else
+      puts 'Pick the train from which would you like to detach a wagon:'
+      @trains.each_with_index do |train, index|
+        puts "#{index} - #{train.type} train №#{train.number}"
+      end
+    end
+    train_choice_index = gets.chomp.to_i
+    train = @trains[train_choice_index]
+    last_wagon = train.wagons.last
+    train.detach_wagons(last_wagon)
+  end
+
+  def move_train
+    # Перемещать поезд по маршруту вперед и назад
+    puts 'Pick a train that you would like to move:'
+    @trains.each_with_index do |train, index|
+      puts "#{index} - #{train.type} train №#{train.number}"
+    end
+    train_choice_index = gets.chomp.to_i
+    train = @trains[train_choice_index]
+    puts 'Would you like to go forward or backward?'
+    puts '0 - move forward'
+    puts '1 - move backward'
+    direction_choice = gets.chomp.to_i
+    case direction_choice
+    when 0
+      train.move_forward
+    when 1
+      train.move_backward
+    else
+      puts 'Wrong choice.'
+    end
+  end
+
+  # Просматривать список станций и список поездов на станции
+  def list_stations
+    if @stations.empty?
+      puts 'No stations found. Create a station or a route first!'
+    else
+      puts 'List of all stations'
+      puts 'Pick any station to see the list of trains parked on it:'
+      @stations.each_with_index do |station, index|
+        puts "#{index} - #{station.name}, number of trains: #{@trains.number}"
+      end
+      station_choice = gets.chomp.to_i
+
+    end
   end
 end
 main = Main.new
