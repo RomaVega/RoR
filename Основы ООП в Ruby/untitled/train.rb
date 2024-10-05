@@ -37,10 +37,10 @@ class Train
     if @speed.zero?
       if wagon.type == @type
         @wagons << wagon
-        puts "Wagon #{wagon.type} added ✓"
-        puts "Total number of #{@type} wagons is #{@wagons.size}"
+        puts "Wagon #{wagon.type} attached ✓"
+        puts "Wagons total: #{@wagons.size}"
       else
-        puts 'Type of wagon doesnt match the type of the train.'
+        puts 'Type of wagon doesnt match the type of the train!'
       end
     else
       puts 'Cannot attach wagons while train is moving!'
@@ -51,12 +51,11 @@ class Train
     if @speed.zero?
       if @wagons.include?(wagon)
         @wagons.delete(wagon)
-        puts 'Wagon detached ✓'
+        puts 'Wagon detached ×'
         puts "Wagons total: #{@wagons.size}"
       else
-        'Such wagon is not found on this train.'
+        'Such wagon is not found on this train!'
       end
-      "Train length (number of wagons) reduced by 1. Total: #{@wagons}"
     else
       'Cannot detach wagons, train is either moving or not attached!'
     end
@@ -80,9 +79,8 @@ class Train
       current_station.dispatch(self)
       @current_station_index += 1
       current_station.let_train_in(self)
-      puts "Train has arrived on station: #{current_station.name}."
     else
-      puts "Train is already on the last station of the route: #{current_station.name}."
+      puts "Train is already on the last station of the route: #{current_station.name}!"
     end
   end
 
@@ -91,9 +89,8 @@ class Train
       current_station.dispatch(self)
       @current_station_index -= 1
       current_station.let_train_in(self)
-      puts "Train has arrived to station: #{current_station.name}."
     else
-      puts 'Train is already on the first station of the route.'
+      puts 'Train is already on the first station of the route!'
     end
   end
 

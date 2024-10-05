@@ -6,6 +6,7 @@ require_relative 'train'
 require_relative 'wagon'
 class Main
   def initialize
+    @stations_intermediate = []
     @stations = []
     @trains = []
     @routes = []
@@ -25,15 +26,14 @@ class Main
     loop do
       puts "\nChose an action:"
       puts '----------------'
-      puts '1 - create a station.'
-      puts '2 - create a train.'
-      puts '3 - create a route & add/delete stations.'
-      puts '4 - assign a route to the train.'
-      puts '5 - add wagons to the train.'
-      puts '6 - detach wagons from the train.'
-      puts '7 - move train along the route.'
-      puts '8 - list stations / trains on stations.'
-      puts
+      puts '1 - create a station'
+      puts '2 - create a train'
+      puts '3 - create a route / add / delete stations'
+      puts '4 - assign a route to the train'
+      puts '5 - add wagons to the train'
+      puts '6 - detach wagons from the train'
+      puts '7 - move train along the route'
+      puts '8 - list stations / trains on stations'
 
       choice = gets.chomp.to_i
       puts
@@ -58,7 +58,7 @@ class Main
       when 0
         break
       else
-        puts 'Wrong number.'
+        puts 'Wrong number!'
       end
     end
   end
@@ -66,14 +66,16 @@ class Main
   def create_station
     puts 'What is the name of the station?'
     name = gets.chomp
+    puts
     station = Station.new(name)
-    @stations << station
+    @stations_intermediate << station
     puts "Station #{name} was created ✓"
   end
 
   def create_train
     puts 'What is the train number?'
     number = gets.chomp
+    puts
     puts 'Select the type of the train:'
     puts '1 - passenger train'
     puts '2 - cargo train'
@@ -92,15 +94,15 @@ class Main
       @trains << train
       puts "#{type} train №#{number} was created ✓"
     else
-      puts 'Wrong choice. Train was not created.'
+      puts 'Wrong choice. Train was not created ×'
     end
   end
 
   def manage_route
     puts 'Select the action:'
-    puts '1 - create a route.'
-    puts '2 - add a station to the route.'
-    puts '3 - delete a station from the route.'
+    puts '1 - create a route'
+    puts '2 - add a station to the route'
+    puts '3 - delete a station from the route'
     choice = gets.chomp.to_i
     puts
 
@@ -117,13 +119,15 @@ class Main
       last_station = Station.new(last_station_name)
       route = Route.new(first_station, last_station)
       @routes << route
+      @stations << first_station
+      @stations << last_station
       puts 'Route created ✓'
-      puts "First station is: #{first_station.name}"
-      puts "Last station is: #{last_station.name}"
+      puts "First station: #{first_station.name}"
+      puts "Last station: #{last_station.name}"
 
     when 2
       if @routes.empty?
-        puts 'No routes available. Please create a route first.'
+        puts 'No routes available. Please create a route first!'
       else
         # Вывод списка маршрутов для выбора, куда добавить станцию:
         puts 'Chose the route to which would you like to add a station:'
@@ -133,10 +137,13 @@ class Main
         route_index = gets.chomp.to_i
         puts
         route = @routes[route_index]
-        puts 'Enter the name of the station you want to add to the route:'
-        name = gets.chomp
+        puts 'Pick the station you want to add to the route:'
+        @stations_intermediate.each_with_index do |station, index|
+          puts "#{index} - #{station.name}"
+        end
+        intermediate_station_index = gets.chomp.to_i
         puts
-        intermediate_station = Station.new(name)
+        intermediate_station = @stations_intermediate[intermediate_station_index]
         route.add_station(intermediate_station)
       end
 
@@ -156,12 +163,12 @@ class Main
       route = @routes[route_index]
 
       if route.stations.length <= 2
-        puts 'No intermediate stations to delete on this route.'
+        puts 'No intermediate stations to delete on this route!'
         return
       end
 
       if route == route.stations.first || route == route.stations.last
-        puts 'You cannot delete the first or last station'
+        puts 'You cannot delete the first or last station!'
         return
       end
 
@@ -192,11 +199,11 @@ class Main
     @trains.each_with_index do |train, index|
       puts "#{index} - #{train.type} train №#{train.number}"
     end
-
     train_number = gets.chomp.to_i
+    puts
     train = @trains[train_number]
     if train.nil?
-      puts 'Wrong choice. Chose an existing train from the list.'
+      puts 'Wrong choice. Chose an existing train from the list!'
       return
     end
 
@@ -209,11 +216,12 @@ class Main
     route = @routes[route_index]
 
     if route.nil?
-      puts 'Wrong choice. Chose an existing route from the list.'
+      puts 'Wrong choice. Chose an existing route from the list!'
       return
     end
 
-    puts "Route from #{route.stations.first.name} to #{route.stations.last.name} was assigned to the #{train.type} train №#{train.number} ✓"
+    puts "Route from #{route.stations.first.name} to #{route.stations.last.name}:"
+    puts "was assigned to the #{train.type} train №#{train.number} ✓"
     train.accept_route(route)
   end
 
@@ -229,9 +237,10 @@ class Main
     end
 
     train_choice = gets.chomp.to_i
+    puts
 
     if @trains[train_choice].nil?
-      puts 'Wrong choice.'
+      puts 'Wrong choice!'
       return
     end
 
@@ -258,6 +267,7 @@ class Main
       end
     end
     train_choice_index = gets.chomp.to_i
+    puts
     train = @trains[train_choice_index]
     last_wagon = train.wagons.last
     train.detach_wagons(last_wagon)
@@ -270,33 +280,40 @@ class Main
       puts "#{index} - #{train.type} train №#{train.number}"
     end
     train_choice_index = gets.chomp.to_i
+    puts
     train = @trains[train_choice_index]
     puts 'Would you like to go forward or backward?'
     puts '0 - move forward'
     puts '1 - move backward'
     direction_choice = gets.chomp.to_i
+    puts
     case direction_choice
     when 0
       train.move_forward
     when 1
       train.move_backward
     else
-      puts 'Wrong choice.'
+      puts 'Wrong choice!'
     end
   end
 
   # Просматривать список станций и список поездов на станции
-  def list_stations
+  def list_stations_and_trains
     if @stations.empty?
       puts 'No stations found. Create a station or a route first!'
     else
-      puts 'List of all stations'
-      puts 'Pick any station to see the list of trains parked on it:'
+      puts 'List of all stations:'
       @stations.each_with_index do |station, index|
-        puts "#{index} - #{station.name}, number of trains: #{@trains.number}"
+        puts "#{index} - #{station.name}, number of trains: #{station.trains.size}"
       end
-      station_choice = gets.chomp.to_i
+      puts
+      puts 'Pick any station to see the list of trains parked on it:'
+      station_choice_index = gets.chomp.to_i
+      puts
+      selected_station = @stations[station_choice_index]
 
+      puts "List of trains parked on the station #{selected_station.name}:"
+      selected_station.list_all_trains
     end
   end
 end
