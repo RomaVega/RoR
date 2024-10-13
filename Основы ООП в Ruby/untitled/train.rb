@@ -7,7 +7,7 @@ require_relative 'wagon'
 
 class Train
   # Может возвращать номер вагона, тип, кол-во вагонов и текущую скорость:
-  attr_reader :number, :type, :wagons, :speed
+  attr_reader :number, :type, :wagons, :speed, :route
 
   # Имеет номер (произвольная строка) и тип (грузовой, пассажирский) и количество вагонов,
   # эти данные указываются при создании экземпляра класса:
@@ -16,6 +16,8 @@ class Train
     @type = type
     @speed = 0
     @wagons = []
+    @route = nil
+    @current_station_index = 0
   end
   
   # Может набирать скорость:
@@ -51,7 +53,7 @@ class Train
     if @speed.zero?
       if @wagons.include?(wagon)
         @wagons.delete(wagon)
-        puts 'Wagon detached ×'
+        puts "Wagon #{type} detached ×"
         puts "Wagons total: #{@wagons.size}"
       else
         'Such wagon is not found on this train!'

@@ -17,7 +17,7 @@ class Station
   # (по одному за раз, при этом, поезд удаляется из списка поездов, находящихся на станции):
   def dispatch(train)
     @trains.delete(train)
-    puts "Train №#{train.number} was dispatched from the station #{@name} ✓"
+    puts "Train №#{train.number} dispatched from the station #{@name} ×"
   end
 
   # Может возвращать список всех поездов на станции, находящиеся в текущий момент:
