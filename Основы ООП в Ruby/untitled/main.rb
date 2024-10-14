@@ -1,9 +1,10 @@
 # frozen_string_literal: true
+
 require_relative 'station'
 require_relative 'route'
 require_relative 'train'
 require_relative 'wagon'
-
+# Main class that provides the core CLI functionality
 class Main
   attr_accessor :stations
 
@@ -46,37 +47,37 @@ class Main
     puts 'What is the name of the station?'
     name = gets.chomp.strip
     puts
-    if @stations.any? { |station| station.name == name }
-      puts "Station '#{name}' already exists!"
-    else
-      station = Station.new(name)
-      @stations << station
-      puts "Station #{name} was created ✓"
-    end
+    return puts "Station '#{name}' already exists!" if @stations.any? { |station| station.name == name }
+
+    @stations << Station.new(name)
+    puts "Station #{name} was created ✓"
   end
 
   def create_train
     puts 'What is the train number?'
     number = gets.chomp.strip
     puts
-    puts 'Select the type of the train:'
+    puts 'Select a type of the train:'
     puts '1 - passenger train'
     puts '2 - cargo train'
-    choice = gets.chomp.to_i
+    train_type = gets.chomp.to_i
     puts
-
-    case choice
-    when 1
-      train = Train.new(number, 'passenger')
-      @trains << train
-      puts "Passenger train №#{number} was created ✓"
-    when 2
-      train = Train.new(number, 'cargo')
-      @trains << train
-      puts "Cargo train №#{number} was created ✓"
+    case train_type
+    when 1 then create_passenger_train(number)
+    when 2 then create_cargo_train(number)
     else
       puts 'Invalid choice. Train was not created ×'
     end
+  end
+
+  def create_passenger_train(number)
+    @trains << Train.new(number, 'passenger')
+    puts "Passenger train №#{number} was created ✓"
+  end
+
+  def create_cargo_train(number)
+    @trains << Train.new(number, 'cargo')
+    puts "Cargo train №#{number} was created ✓"
   end
 
   def manage_route
@@ -86,17 +87,18 @@ class Main
     puts '3 - delete a station from the route'
     choice = gets.chomp.to_i
     puts
-
     case choice
     when 1 then create_a_route
-    when 2 then add_a_station_to_the_route
-    when 3 then delete_a_station_from_the_route
+    when 2 then add_station_to_route
+    when 3 then delete_station_from_route
     else
       puts 'Invalid choice!'
     end
   end
 
   def create_a_route
+    return puts 'At least 2 stations are required to create a route. Create some stations!' if @stations.size < 2
+
     puts 'Pick the first station:'
     list_stations_with_index
     first_station = select_from_collection(@stations)
@@ -112,35 +114,31 @@ class Main
     if last_station == first_station
       puts 'First station cannot be the same as the last station!'
     else
-      route = Route.new(first_station, last_station)
-      @routes << route
+      @routes << Route.new(first_station, last_station)
     end
   end
 
-  def add_a_station_to_the_route
-    if @routes.empty?
-      puts 'No routes available. Please, create a route first!'
-    else
-      puts 'Chose the route to which would you like to add a station:'
-      list_routes_with_index
-      route = select_from_collection(@routes)
-      puts
-      puts 'Pick the station you would like to add to the route:'
-      available_stations = @stations - [route.stations.first, route.stations.last]
-      list_available_stations(available_stations)
-      intermediate_station = select_from_collection(available_stations)
-      puts
-      route.add_station(intermediate_station)
-    end
+  def add_station_to_route
+    return puts 'No routes available. Please, create a route first!' if @routes.empty?
+
+    puts 'Chose the route to which would you like to add a station:'
+    list_routes_with_index
+    route = select_from_collection(@routes)
+    puts
+    available_stations = @stations - [route.stations.first, route.stations.last]
+    return puts 'No stations available to add. Create a station first!' if available_stations.empty?
+
+    puts 'Pick the station you would like to add to the route:'
+    list_available_stations(available_stations)
+    intermediate_station = select_from_collection(available_stations)
+    puts
+    route.add_station(intermediate_station)
   end
 
-  def delete_a_station_from_the_route
-    if @routes.empty?
-      puts 'No available route. Create a route first!'
-      return
-    end
+  def delete_station_from_route
+    return puts 'No available routes. Create a route first!' if @routes.empty?
 
-    puts 'Select the route from which would you like to delete a station:'
+    puts 'Select a route from which would you like to delete a station:'
     list_routes_with_index
     route_choice = select_from_collection(@routes)
     intermediate_stations = route_choice.stations[1..-2]
@@ -156,14 +154,14 @@ class Main
   end
 
   def assign_route
-    return puts 'No trains available. Create the train first!' if @trains.empty?
-    return puts 'No routes available. Create the route first!' if @routes.empty?
+    return puts 'No trains available. Create a train first!' if @trains.empty?
+    return puts 'No routes available. Create a route first!' if @routes.empty?
 
-    puts 'Select the train you would like to assign a route to:'
+    puts 'Select a train you would like to assign a route to:'
     list_available_trains
     train = select_from_collection(@trains)
     puts
-    puts "Chose the route you want to assign to the train №#{train.number}:"
+    puts "Chose a route you want to assign to the train №#{train.number}:"
     list_all_routes
     route = select_from_collection(@routes)
     puts
@@ -215,13 +213,13 @@ class Main
 
     puts
     puts 'Would you like to go forward or backward?'
-    puts '1 - move forward'
-    puts '2 - move backward'
+    puts '1 - move backward'
+    puts '2 - move forward'
     direction_choice = gets.chomp.to_i
     puts
     case direction_choice
-    when 1 then train.move_forward
-    when 2 then train.move_backward
+    when 1 then train.move_backward
+    when 2 then train.move_forward
     else
       puts 'Wrong choice!'
     end
@@ -230,7 +228,7 @@ class Main
   def list_stations_and_trains
     return puts 'No stations found. Create a station or a route first!' if @stations.empty?
 
-    puts 'List of all stations:'
+    puts 'List of all stations with number of trains on each:'
     @stations.each_with_index do |station, index|
       puts "#{index + 1} - #{station.name}, number of trains: #{station.trains.size}"
     end
@@ -246,7 +244,6 @@ class Main
   private
 
   def select_from_collection(collection)
-    # Выбор по индексу, а не по именам
     loop do
       index = gets.chomp.to_i - 1
       return collection[index] if index >= 0 && index < collection.length
