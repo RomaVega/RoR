@@ -20,9 +20,6 @@ class Main
   def main_menu
     loop do
       display_total_stations_trains_routes
-      #puts "\nStations total: #{Station.instances}"
-      #puts "Trains total: #{Train.instances}"
-      #puts "Routes total: #{Route.instances}"
       puts "\nChose an action:"
       puts '----------------'
       puts '1 - create a station'
