@@ -3,11 +3,12 @@ class Route
   attr_reader :stations
 
   include InstanceCounter
+  include TextFormatter
 
   # Имеет начальную и конечную станцию, а также список промежуточных станций
   def initialize(first_station, last_station)
     @stations = [first_station, last_station]
-    puts "Route from #{first_station.name} to #{last_station.name} was created ✓"
+    puts clr("Route from #{first_station.name} to #{last_station.name} created ✓", 32)
     # Увеличиваем счетчик при создании нового экземпляра
     register_instance
   end
@@ -15,7 +16,7 @@ class Route
   # Добавляет промежуточную станцию в список
   def add_station(station)
     @stations.insert(-2, station)
-    puts "Station #{station.name} added to the route ✓"
+    puts clr("Station #{station.name} added to the route ✓", 32)
   end
 
   # Удаляет промежуточную станцию из списка
@@ -23,7 +24,7 @@ class Route
     if station != @stations.first && station != @stations.last && @stations.include?(station)
       @stations.delete(station)
       puts
-      puts "Station #{station.name} was deleted from the route ×"
+      puts clr("Station #{station.name} deleted from the route ×", 31)
     end
   end
 

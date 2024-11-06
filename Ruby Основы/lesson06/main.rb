@@ -1,15 +1,19 @@
 # frozen_string_literal: true
-
+require_relative 'text_formatter'
 require_relative 'instance_counter'
 require_relative 'station'
 require_relative 'route'
 require_relative 'train'
 require_relative 'wagon'
+require_relative 'cargo_wagon'
+require_relative 'passenger_wagon'
+
 # Main class that provides the core CLI functionality
 class Main
   attr_accessor :stations
 
   include Manufacturer
+  include TextFormatter
 
   def initialize
     @stations = []
@@ -20,82 +24,56 @@ class Main
   def main_menu
     loop do
       display_total_stations_trains_routes
-      puts "\nChose an action:"
-      puts '----------------'
-      puts '1 - create a station'
-      puts '2 - create a train'
-      puts '3 - create a route / add / delete stations'
-      puts '4 - assign a route to the train'
-      puts '5 - add wagons to the train'
-      puts '6 - detach wagons from the train'
-      puts '7 - move train along the route'
-      puts '8 - list stations / trains on stations'
-      puts '9 - set / get manufacturer name'
-      puts '10 - find a train by its number'
-      choice = gets.chomp.to_i
-      puts
-      case choice
-      when 1 then create_station
-      when 2 then create_train
-      when 3 then manage_route
-      when 4 then assign_route
-      when 5 then add_wagon
-      when 6 then detach_wagon
-      when 7 then move_train
-      when 8 then list_stations_and_trains
-      when 9 then set_get_manufacturer
-      when 10 then find_train_by_number
-      else
-        puts 'Invalid number. Enter a number from the menu!'
-      end
+      show_menu
+      choice = get_choice
+      take_action(choice)
     end
   end
 
   def create_station
-    puts 'What is the name of the station?'
-    name = gets.chomp.strip
+    puts "\nWhat is the name of the station?"
+         name = gets.chomp.strip
     puts
     return puts "Station '#{name}' already exists!" if @stations.any? { |station| station.name == name }
 
     @stations << Station.new(name)
-    puts "Station #{name} was created ✓"
+    puts clr("Station #{name} created ✓", 32)
     puts
-    puts "List of all stations:"
-    Station.all.each { |station| puts station.name }
+    puts 'List of all stations:'
+    Station.all.each { |station| puts clr(station.name, 37) }
   end
 
   def create_train
-    puts 'What is the train number?'
+    puts "\nWhat is the train number?"
     number = gets.chomp.strip
-    puts
-    puts 'Select a type of the train:'
-    puts '1 - passenger train'
-    puts '2 - cargo train'
+    puts "\nSelect a type of the train:"
+    puts clr('1 - passenger train', 37)
+    puts clr('2 - cargo train', 37)
     train_type = gets.chomp.to_i
     puts
     case train_type
     when 1 then create_passenger_train(number)
     when 2 then create_cargo_train(number)
     else
-      puts 'Invalid choice. Train was not created ×'
+      puts clr('Invalid choice. Train was not created ×', 31)
     end
   end
 
   def create_passenger_train(number)
     @trains << Train.new(number, 'passenger')
-    puts "Passenger train №#{number} was created ✓"
+    puts clr("Passenger train №#{number} created ✓", 32)
   end
 
   def create_cargo_train(number)
     @trains << Train.new(number, 'cargo')
-    puts "Cargo train №#{number} was created ✓"
+    puts clr("Cargo train №#{number} created ✓", 32)
   end
 
   def manage_route
-    puts 'Select an action:'
-    puts '1 - create a route'
-    puts '2 - add a station to the route'
-    puts '3 - delete a station from the route'
+    puts "\nSelect an action:"
+    puts clr('1 - create a route', 37)
+    puts clr('2 - add a station to the route', 37)
+    puts clr('3 - delete a station from the route', 37)
     choice = gets.chomp.to_i
     puts
     case choice
@@ -165,27 +143,24 @@ class Main
   end
 
   def assign_route
-    return puts 'No trains available. Create a train first!' if @trains.empty?
-    return puts 'No routes available. Create a route first!' if @routes.empty?
+    return puts "\nNo trains available. Create a train first!" if @trains.empty?
+    return puts "\nNo routes available. Create a route first!" if @routes.empty?
 
-    puts 'Select a train you would like to assign a route to:'
+    puts "\nSelect a train you would like to assign a route to:"
     list_available_trains
     train = select_from_collection(@trains)
-    puts
-    puts "Chose a route you want to assign to the train №#{train.number}:"
+    puts "\nChose a route you want to assign to the train №#{train.number}:"
     list_all_routes
     route = select_from_collection(@routes)
-    puts
-    puts "Route from #{route.stations.first.name} to #{route.stations.last.name}:"
-    puts "was assigned to the #{train.type} train №#{train.number} ✓"
-    puts
+    puts clr("\nRoute from #{route.stations.first.name} to #{route.stations.last.name} assigned to:", 32)
+    puts clr("#{train.type.capitalize} train №#{train.number} ✓", 32)
     train.accept_route(route)
   end
 
   def add_wagon
-    return puts 'No trains available. Create a train first!' if @trains.empty?
+    return puts "\nNo trains available. Create a train first!" if @trains.empty?
 
-    puts 'Select the train you would like to add a wagon:'
+    puts "\nSelect the train you would like to add a wagon:"
     list_available_trains
     train = select_from_collection(@trains)
     puts
@@ -201,9 +176,9 @@ class Main
   end
 
   def detach_wagon
-    return puts 'No trains available. Create the train first!' if @trains.empty?
+    return puts "\nNo trains available. Create the train first!" if @trains.empty?
 
-    puts 'Pick the train from which would you like to detach a wagon:'
+    puts "\nPick the train from which would you like to detach a wagon:"
     list_available_trains
     train_choice = select_from_collection(@trains)
     puts
@@ -214,18 +189,16 @@ class Main
   end
 
   def move_train
-    return puts 'No trains to move. Create a train and assign a route to it first!' if @trains.empty?
+    return puts "\nNo trains to move. Create a train and assign a route to it first!" if @trains.empty?
 
-    puts 'Pick a train that you would like to move:'
+    puts "\nPick a train that you would like to move:"
     list_available_trains
     train = select_from_collection(@trains)
-    puts
-    return puts 'Train cannot move without assigned route. Assign the route to this train first!' if train.route.nil?
+    return puts "\nTrain cannot move without assigned route. Assign the route to this train first!" if train.route.nil?
 
-    puts
-    puts 'Would you like to go forward or backward?'
-    puts '1 - move backward'
-    puts '2 - move forward'
+    puts "\nWould you like to go forward or backward?"
+    puts clr('1 - move backward', 37)
+    puts clr('2 - move forward', 37)
     direction_choice = gets.chomp.to_i
     puts
     case direction_choice
@@ -237,27 +210,25 @@ class Main
   end
 
   def list_stations_and_trains
-    return puts 'No stations found. Create a station or a route first!' if @stations.empty?
+    return puts "\nNo stations found. Create a station or a route first!" if @stations.empty?
 
-    puts 'List of all stations with number of trains on each:'
+    puts "\nList of all stations with number of trains on each:"
     @stations.each_with_index do |station, index|
-      puts "#{index + 1} - #{station.name}, number of trains: #{station.trains.size}"
+      puts clr("#{index + 1} - #{station.name}, number of trains: #{station.trains.size}", 37)
     end
-    puts
-    puts 'Pick any station to see the list of trains parked on it:'
+    puts "\nPick any station to see the list of trains parked on it:"
 
     station = select_from_collection(@stations)
-    puts
-    puts "List of trains parked on the station #{station.name}:"
+    puts "\nList of trains parked on the station #{station.name}:"
     station.list_all_trains
   end
-  
-  def set_get_manufacturer
-    return puts 'No trains or wagons found. Create a train first!' if @trains.empty?
 
-    puts 'Would you like to set the manufacturer name or display it?'
-    puts '1 - set'
-    puts '2 - display'
+  def set_get_manufacturer
+    return puts "\nNo trains or wagons found. Create a train first!" if @trains.empty?
+
+    puts "\nWould you like to set the manufacturer name or display it?"
+    puts clr('1 - set', 37)
+    puts clr('2 - display', 37)
     set_or_get_user_choice = gets.chomp.to_i
     puts
     case set_or_get_user_choice
@@ -274,17 +245,17 @@ class Main
   end
 
   def find_train_by_number
-    return puts 'No trains. Create a train first!' if @trains.empty?
+    return puts "\nNo trains available. Create a train first!" if @trains.empty?
 
-    puts 'Enter the train number you want to find:'
+    puts "\nEnter the train number you want to find:"
     train_number = gets.chomp.strip
     puts
     train = Train.find(train_number)
     if train
-      puts 'Train found ✓'
+      puts clr('Train found ✓', 32)
       puts "№#{train.number}, Type: #{train.type}, Wagons: #{train.wagons.size}"
     else
-      puts "Train with number #{train_number} not found ×"
+      puts clr("Train with number #{train_number} not found ×", 31)
     end
   end
 
@@ -292,10 +263,52 @@ class Main
 
   def display_total_stations_trains_routes
     puts "\n┌───────────────────┐"
-    puts "│ Stations total: #{Station.instances} │"
-    puts "│ Trains total:   #{Train.instances} │"
-    puts "│ Routes total:   #{Route.instances} │"
-    puts "└───────────────────┘"
+    puts "│ Stations total: \e[5m#{Station.instances}\e[0m │"
+    puts "│ Trains total: \e[5m#{Train.instances}\e[0m   │"
+    puts "│ Routes total: \e[5m#{Route.instances}\e[0m   │"
+    puts '└───────────────────┘'
+  end
+
+  def get_choice
+    puts "\nChose an action:"
+    gets.chomp.to_i
+  end
+
+  def show_menu
+    puts clr("\n        \e[1mMENU\e[0m", 36)
+    puts
+    menu_items = [
+      'create a station',
+      'create a train',
+      'create a route / add / delete stations',
+      'assign a route to the train',
+      'add wagons to the train',
+      'detach wagons from the train',
+      'move train along the route',
+      'list stations / trains on stations',
+      'set / get manufacturer name',
+      'find a train by its number'
+    ]
+    menu_items.each_with_index do |item, index|
+      puts clr("#{index + 1} - #{item}", 97)
+    end
+  end
+
+  def take_action(choice)
+    case choice
+    when 1 then create_station
+    when 2 then create_train
+    when 3 then manage_route
+    when 4 then assign_route
+    when 5 then add_wagon
+    when 6 then detach_wagon
+    when 7 then move_train
+    when 8 then list_stations_and_trains
+    when 9 then set_get_manufacturer
+    when 10 then find_train_by_number
+    else
+      puts 'Invalid number. Enter a number from the menu!'
+    end
   end
 
   def select_from_collection(collection)
@@ -324,25 +337,25 @@ class Main
 
   def list_available_trains
     @trains.each_with_index do |train, index|
-      puts "#{index + 1} - #{train.type} train, wagons: #{train.wagons.size}"
+      puts clr("#{index + 1} - #{train.type} train, wagons: #{train.wagons.size}",37)
     end
   end
 
   def list_all_routes
     @routes.each_with_index do |route, index|
-      puts "#{index + 1} - route from #{route.stations.first.name} to #{route.stations.last.name}"
+      puts clr("#{index + 1} - route from #{route.stations.first.name} to #{route.stations.last.name}", 37)
     end
   end
 
   def list_stations_with_index
     @stations.each_with_index do |station, index|
-      puts "#{index + 1} - #{station.name}"
+      puts clr("#{index + 1} - #{station.name}", 37)
     end
   end
 
   def list_routes_with_index
     @routes.each_with_index do |route, index|
-      puts "#{index + 1} - route from #{route.stations.first.name} to #{route.stations.last.name}"
+      puts clr("#{index + 1} - route from #{route.stations.first.name} to #{route.stations.last.name}", 37)
     end
   end
 
@@ -351,15 +364,18 @@ class Main
     return if intermediate_stations.empty?
 
     intermediate_stations.each_with_index do |station, index|
-      puts "#{index + 1} - #{station.name}"
+      puts clr("#{index + 1} - #{station.name}",37)
     end
   end
 
   def list_available_stations(stations)
     stations.each_with_index do |station, index|
-      puts "#{index + 1} - #{station.name}"
+      puts clr("#{index + 1} - #{station.name}",37)
     end
   end
+
 end
 main = Main.new
 main.main_menu
+cargo_wagon = CargoWagon.new
+puts cargo_wagon.inspect

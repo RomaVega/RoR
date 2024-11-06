@@ -1,12 +1,15 @@
 require_relative 'route'
 require_relative 'station'
 require_relative 'wagon'
+require_relative 'cargo_wagon'
+require_relative 'passenger_wagon'
 require_relative 'manufacturer'
 
 class Train
   attr_reader :number, :type, :wagons, :speed, :route
 
   include InstanceCounter
+  include TextFormatter
 
   # Класс переменная для хранения всех соданных поездов
   @trains = []
@@ -50,7 +53,7 @@ class Train
     if @speed.zero?
       if wagon.type == @type
         @wagons << wagon
-        puts "Wagon #{wagon.type} attached ✓"
+        puts clr("Wagon #{wagon.type} attached ✓",32)
         puts "Wagons total: #{@wagons.size}"
       else
         puts 'Type of wagon doesnt match the type of the train!'
@@ -64,7 +67,7 @@ class Train
     if @speed.zero?
       if @wagons.include?(wagon)
         @wagons.delete(wagon)
-        puts "Wagon #{type} detached ×"
+        puts clr("Wagon #{type} detached ×", 31)
         puts "Wagons total: #{@wagons.size}"
       else
         'Such wagon is not found on this train!'

@@ -16,7 +16,7 @@ module Manufacturer
     if choice.between?(0, MANUFACTURERS.size - 1)
       self.manufacturer_name = MANUFACTURERS[choice]
       puts
-      puts "Manufacturer set to: #{manufacturer_name} ✓"
+      puts clr("Manufacturer set to: #{manufacturer_name} ✓", 32)
     else
       puts
       puts 'Invalid choice. Please, select manufacturer from the list:'
@@ -29,7 +29,7 @@ module Manufacturer
     puts 'List of trains and their manufacturers:'
     @trains.each do |train|
       manufacturer = train.manufacturer_name || 'not set.'
-      puts "Train №#{train.number} - Manufacturer: #{manufacturer}"
+      puts clr("Train №#{train.number} - Manufacturer: #{manufacturer}",37)
     end
   end
 
@@ -37,7 +37,7 @@ module Manufacturer
 
   def list_manufacturers
     MANUFACTURERS.each_with_index do |manufacturer, index|
-      puts "#{index + 1} - #{manufacturer}"
+      puts clr("#{index + 1} - #{manufacturer}", 37)
     end
   end
 end
