@@ -53,7 +53,7 @@ class Train
     if @speed.zero?
       if wagon.type == @type
         @wagons << wagon
-        puts clr("Wagon #{wagon.type} attached ✓",32)
+        puts clr("Wagon #{wagon.type} attached ✓", 32)
         puts "Wagons total: #{@wagons.size}"
       else
         puts 'Type of wagon doesnt match the type of the train!'

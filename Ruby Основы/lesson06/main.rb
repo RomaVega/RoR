@@ -38,8 +38,7 @@ class Main
 
     @stations << Station.new(name)
     puts clr("Station #{name} created ✓", 32)
-    puts
-    puts 'List of all stations:'
+    puts "\nList of all stations:"
     Station.all.each { |station| puts clr(station.name, 37) }
   end
 

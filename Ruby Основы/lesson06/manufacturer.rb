@@ -29,7 +29,7 @@ module Manufacturer
     puts 'List of trains and their manufacturers:'
     @trains.each do |train|
       manufacturer = train.manufacturer_name || 'not set.'
-      puts clr("Train №#{train.number} - Manufacturer: #{manufacturer}",37)
+      puts clr("Train №#{train.number} - Manufacturer: #{manufacturer}", 37)
     end
   end
 
