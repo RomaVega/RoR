@@ -10,23 +10,21 @@ module Manufacturer
   ].freeze
 
   def set_manufacturer
-    puts 'Chose a manufacturer from the list:'
+    puts "\nChose a manufacturer from the list:"
     list_manufacturers
     choice = gets.to_i - 1
     if choice.between?(0, MANUFACTURERS.size - 1)
       self.manufacturer_name = MANUFACTURERS[choice]
-      puts
-      puts clr("Manufacturer set to: #{manufacturer_name} ✓", 32)
+      puts clr("\nManufacturer set to: #{manufacturer_name} ✓", 32)
     else
-      puts
-      puts 'Invalid choice. Please, select manufacturer from the list:'
+      puts "\nInvalid choice. Please, select manufacturer from the list:"
     end
   end
 
   def get_manufacturer
-    return puts 'Manufacturer not set.' if @trains.empty?
+    return puts "\nManufacturer not set." if @trains.empty?
 
-    puts 'List of trains and their manufacturers:'
+    puts "\nList of trains and their manufacturers:"
     @trains.each do |train|
       manufacturer = train.manufacturer_name || 'not set.'
       puts clr("Train №#{train.number} - Manufacturer: #{manufacturer}", 37)

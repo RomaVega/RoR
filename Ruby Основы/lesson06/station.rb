@@ -32,7 +32,7 @@ class Station
   # (по одному за раз, при этом, поезд удаляется из списка поездов, находящихся на станции):
   def dispatch(train)
     @trains.delete(train)
-    puts clr("Train №#{train.number} dispatched from station #{@name} ×", 31)
+    puts clr("\nTrain №#{train.number} dispatched from station #{@name} ×", 91)
   end
 
   # Может возвращать список всех поездов на станции, находящиеся в текущий момент:
@@ -45,7 +45,7 @@ class Station
   # Может возвращать список поездов на станции по типу (см. ниже): кол-во грузовых, пассажирских:
   def list_trains_by_type(type)
     trains_by_type = @trains.select { |train| train.type == type }
-    puts clr("Trains on the station: #{@name}, type: '#{type}':", 37)
+    puts clr("\nTrains on the station: #{@name}, type: '#{type}':", 37)
     trains_by_type.each { |train| puts "Train №#{train.number}" }
   end
 end

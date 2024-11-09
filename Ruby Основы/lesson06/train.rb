@@ -37,29 +37,38 @@ class Train
     self.class.all << self
     # Увеличиваем счетчик при создании нового экземпляра
     register_instance
+    # Проверяем имя станции: что оно не пустое, не состоит из пробелов и >3 символов
+    validate!
+  end
+
+  def valid?
+    validate!
+    true
+  rescue StandardError
+    false
   end
 
   def speed_up(value)
     @speed += value
-    puts "Speed up to: #{@speed}"
+    puts "\nSpeed up to: #{@speed}"
   end
 
   def stop
     @speed = 0
-    puts 'Train stopped'
+    puts "\nTrain stopped"
   end
 
   def add_wagon(wagon)
     if @speed.zero?
       if wagon.type == @type
         @wagons << wagon
-        puts clr("Wagon #{wagon.type} attached ✓", 32)
+        puts clr("\nWagon #{wagon.type} attached ✓", 32)
         puts "Wagons total: #{@wagons.size}"
       else
-        puts 'Type of wagon doesnt match the type of the train!'
+        puts "\nType of wagon doesnt match the type of the train!"
       end
     else
-      puts 'Cannot attach wagons while train is moving!'
+      puts "\nCannot attach wagons while train is moving!"
     end
   end
 
@@ -67,13 +76,13 @@ class Train
     if @speed.zero?
       if @wagons.include?(wagon)
         @wagons.delete(wagon)
-        puts clr("Wagon #{type} detached ×", 31)
+        puts clr("\nWagon #{type} detached ×", 91)
         puts "Wagons total: #{@wagons.size}"
       else
-        'Such wagon is not found on this train!'
+        "\nSuch wagon is not found on this train!"
       end
     else
-      'Cannot detach wagons, train is either moving or not attached!'
+      "\nCannot detach wagons, train is either moving or not attached!"
     end
   end
 
@@ -93,7 +102,7 @@ class Train
       @current_station_index += 1
       current_station.let_train_in(self)
     else
-      puts "Train is already on the last station of the route: #{current_station.name}!"
+      puts "\nTrain is already on the last station of the route: #{current_station.name}!"
     end
   end
 
@@ -103,11 +112,17 @@ class Train
       @current_station_index -= 1
       current_station.let_train_in(self)
     else
-      puts 'Train is already on the first station of the route!'
+      puts "\nTrain is already on the first station of the route!"
     end
   end
 
   private
+
+  def validate!
+    raise 'Train cannot be empty' if number.nil? || number.strip.empty?
+    raise 'Train number must be at least 5 characters' if number.length < 3
+    raise 'Train type must be either "passenger" or "cargo"' unless %w[passenger cargo].include?(type)
+  end
 
   # Метод сделан приватным так как используется только внутри класса для перемещения по маршруту.
   # Возвращать предыдущую станцию, текущую, следующую, на основе маршрута:
