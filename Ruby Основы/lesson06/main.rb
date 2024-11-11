@@ -50,38 +50,11 @@ class Main
     process_route_management_option(user_choice)
   end
 
-  # manage_route methods:
-  def prompt_route_managing_options
-    puts "\nSelect an action:"
-    puts clr('1 - create a route', 37)
-    puts clr('2 - add a station to the route', 37)
-    puts clr('3 - delete a station from the route', 37)
-    gets.chomp.to_i
-  end
-
-  def process_route_management_option(user_choice)
-    case user_choice
-    when 1 then create_a_route
-    when 2 then add_station_to_route
-    when 3 then delete_station_from_route
-    else
-      puts "\nInvalid choice!"
-    end
-  end
-
   def create_a_route
     return puts "\nAt least 2 stations are required to create a route. Create some stations!" if @stations.size < 2
 
-    puts "\nPick the first station:"
-    list_stations_with_index
-    first_station = select_from_collection(@stations)
-    return puts "\nInvalid first station selection!" unless first_station
-
-    puts "\nPick the last station:"
-    list_stations_with_index
-    last_station = select_from_collection(@stations)
-    return puts "\nInvalid last station selection!" unless last_station
-
+    first_station = prompt_for_station("\nPick the first station:")
+    last_station = prompt_for_station("\nPick the last station:")
     if last_station == first_station
       puts "\nFirst station cannot be the same as the last station!"
     else
@@ -90,38 +63,32 @@ class Main
   end
 
   def add_station_to_route
-    return puts "\nNo routes available. Please, create a route first!" if @routes.empty?
+    return puts "\nNo routes available. Create a route first!" if @routes.empty?
+    return puts "\nNo stations available to add. \nCreate another station first!" if @stations.size < 3
 
-    puts "\nChose the route to which would you like to add a station:"
-    list_routes_with_index
-    route = select_from_collection(@routes)
+    route = prompt_for_route("\nChose a route to which would you like to add a station:")
+    puts "\nPick a station you would like to add to the route:"
     available_stations = @stations - [route.stations.first, route.stations.last]
-    return puts "\nNo stations available to add. Create a station first!" if available_stations.empty?
-
-    puts "\nPick the station you would like to add to the route:"
     list_available_stations(available_stations)
-    intermediate_station = select_from_collection(available_stations)
-    route.add_station(intermediate_station)
+    selected_station = select_from_collection(available_stations)
+    route.add_station(selected_station) if selected_station
   end
 
   def delete_station_from_route
     return puts "\nNo available routes. Create a route first!" if @routes.empty?
 
-    puts "\nSelect a route from which would you like to delete a station:"
-    list_routes_with_index
-    route_choice = select_from_collection(@routes)
-    intermediate_stations = route_choice.stations[1..-2]
+    route = prompt_for_route('Select a route from which would you like to delete a station:')
+    return unless route
 
+    intermediate_stations = route.stations[1..-2]
     if intermediate_stations.empty?
       puts "\nNo intermediate stations to delete on this route."
     else
-      puts "\nSelect the station you would like to delete:"
-      list_intermediate_stations_with_index(route_choice)
-      station_to_delete = select_from_intermediate_elements(route_choice.stations)
-      route_choice.delete_station(station_to_delete)
+      station = prompt_for_station_to_delete(intermediate_stations)
+      route.delete_station(station)
     end
   end
-
+  
   def assign_route
     return puts "\nNo trains available. Create a train first!" if @trains.empty?
     return puts "\nNo routes available. Create a route first!" if @routes.empty?
@@ -249,7 +216,7 @@ class Main
   end
 
   def show_menu
-    puts clr("\n        \e[1mMENU\e[0m", 36)
+    puts clr("\n        \e[1mMENU\e[0m\n", 36)
     menu_items = [
       'create a station',
       'create a train',
@@ -342,6 +309,60 @@ class Main
     puts clr("Error: #{e.message}", 31)
   end
 
+  # manage_route methods:
+  def prompt_route_managing_options
+    puts "\nSelect an action:"
+    puts clr('1 - create a route', 37)
+    puts clr('2 - add a station to the route', 37)
+    puts clr('3 - delete a station from the route', 37)
+    gets.chomp.to_i
+  end
+
+  def process_route_management_option(user_choice)
+    case user_choice
+    when 1 then create_a_route
+    when 2 then add_station_to_route
+    when 3 then delete_station_from_route
+    else
+      puts "\nInvalid choice!"
+    end
+  end
+
+  # create_a_route methods:
+  def prompt_for_station(message)
+    puts "\n#{message}"
+    list_stations_with_index
+    selected_station = select_from_collection(@stations)
+    puts "\nInvalid last station selection!" unless selected_station
+    selected_station
+  end
+
+  # add_station_to_route methods:
+  def prompt_for_route(message)
+    puts "\n#{message}"
+    list_routes_with_index
+    selected_route = select_from_collection(@routes)
+    puts "\nInvalid route selection!" unless selected_route
+    selected_route
+  end
+
+  # delete_station_from_route methods:
+  def prompt_for_route(message)
+    puts "#{message}"
+    list_routes_with_index
+    selected_route = select_from_collection(@routes)
+    puts "\nInvalid route selection!" unless selected_route
+    selected_route
+  end
+
+  def prompt_for_station_to_delete(stations)
+    puts "\nSelect the station you would like to delete:"
+    list_available_stations(stations)
+    selected_station = select_from_collection(stations)
+    puts "\nInvalid station selection!" unless selected_station
+    selected_station
+  end
+
   # lists and selectors:
   def list_all_stations
     puts "\nList of all stations:"
@@ -353,7 +374,7 @@ class Main
       index = gets.chomp.to_i - 1
       return collection[index] if index >= 0 && index < collection.length
 
-      puts 'Invalid choice. Please, chose a number from the list!'
+      puts "\nInvalid choice. Please, chose a number from the list!"
     end
   end
 
@@ -368,7 +389,7 @@ class Main
       index = gets.chomp.to_i - 1
       return intermediate_elements[index] if index >= 0 && index < intermediate_elements.length
 
-      puts 'Invalid choice. Please, chose a number from the list!'
+      puts "\nInvalid choice. Please, chose a number from the list!"
     end
   end
 
