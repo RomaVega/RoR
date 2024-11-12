@@ -7,6 +7,7 @@ require_relative 'train'
 require_relative 'wagon'
 require_relative 'cargo_wagon'
 require_relative 'passenger_wagon'
+require_relative 'validation'
 
 # Main class that provides the core CLI functionality
 class Main
@@ -14,6 +15,7 @@ class Main
 
   include Manufacturer
   include TextFormatter
+  include Validation
 
   def initialize
     @stations = []
@@ -43,6 +45,8 @@ class Main
     number = prompt_train_number
     train_type = prompt_train_type
     add_train(number, train_type)
+  rescue RuntimeError => e
+    red_error("\nError: #{e.message}")
   end
 
   def manage_route
@@ -88,7 +92,7 @@ class Main
       route.delete_station(station)
     end
   end
-  
+
   def assign_route
     return puts "\nNo trains available. Create a train first!" if @trains.empty?
     return puts "\nNo routes available. Create a route first!" if @routes.empty?
@@ -275,7 +279,7 @@ class Main
 
   # create_train methods:
   def prompt_train_number
-    puts "\nWhat is the train number?"
+    puts "\nWhat is the train number (5 characters)?"
     gets.chomp.strip
   end
 
@@ -287,11 +291,12 @@ class Main
   end
 
   def add_train(number, train_type)
-    case train_type
-    when 1 then create_passenger_train(number)
-    when 2 then create_cargo_train(number)
+    raise clr('Invalid choice. Train was not created ×', 91) unless [1, 2].include? train_type
+
+    if train_type == 1
+      create_passenger_train(number)
     else
-      puts clr("\nInvalid choice. Train was not created ×", 91)
+      create_cargo_train(number)
     end
   end
 

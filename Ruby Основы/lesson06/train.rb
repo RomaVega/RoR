@@ -4,12 +4,15 @@ require_relative 'wagon'
 require_relative 'cargo_wagon'
 require_relative 'passenger_wagon'
 require_relative 'manufacturer'
+require_relative 'validation'
 
 class Train
   attr_reader :number, :type, :wagons, :speed, :route
 
+  include Manufacturer
   include InstanceCounter
   include TextFormatter
+  include Validation
 
   # Класс переменная для хранения всех соданных поездов
   @trains = []
@@ -24,8 +27,6 @@ class Train
     @trains.find { |train| train.number == number }
   end
 
-  include Manufacturer
-
   def initialize(number, type)
     @number = number
     @type = type
@@ -39,13 +40,6 @@ class Train
     register_instance
     # Проверяем имя станции: что оно не пустое, не состоит из пробелов и >3 символов
     validate!
-  end
-
-  def valid?
-    validate!
-    true
-  rescue StandardError
-    false
   end
 
   def speed_up(value)
@@ -97,7 +91,7 @@ class Train
   # Перемещение возможно вперед и назад, но только на 1 станцию за раз:
   def move_forward
     if next_station
-      # Поезд, прибывший на станцию, удаляется из её списока припаркованных в ней поездов:
+      # Поезд, прибывший на станцию, удаляется из её списка припаркованных в ней поездов:
       current_station.dispatch(self)
       @current_station_index += 1
       current_station.let_train_in(self)
@@ -119,13 +113,13 @@ class Train
   private
 
   def validate!
-    raise 'Train cannot be empty' if number.nil? || number.strip.empty?
-    raise 'Train number must be at least 5 characters' if number.length < 3
-    raise 'Train type must be either "passenger" or "cargo"' unless %w[passenger cargo].include?(type)
+    puts
+    validate_not_empty(:number, 'Train number')
+    validate_length(:number, 'Train number', 5)
+    validate_inclusion(:type, 'Train type', %w[passenger cargo])
   end
 
   # Метод сделан приватным так как используется только внутри класса для перемещения по маршруту.
-  # Возвращать предыдущую станцию, текущую, следующую, на основе маршрута:
   def previous_station
     @route.stations[@current_station_index - 1] if @route && @current_station_index > 0
   end

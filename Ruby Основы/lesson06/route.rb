@@ -1,9 +1,10 @@
+require_relative 'validation'
 class Route
-  # Выводит список всех станций по порядку от начальной до конечной
   attr_reader :stations
 
   include InstanceCounter
   include TextFormatter
+  include Validation
 
   # Имеет начальную и конечную станцию, а также список промежуточных станций
   def initialize(first_station, last_station)
@@ -11,6 +12,8 @@ class Route
     puts clr("\nRoute from #{first_station.name} to #{last_station.name} created ✓", 32)
     # Увеличиваем счетчик при создании нового экземпляра
     register_instance
+    # Проверяем уникальность маршрута, различие в начальной и конечной станциях
+    validate!
   end
 
   # Добавляет промежуточную станцию в список
@@ -32,5 +35,10 @@ class Route
     @stations.each do |station|
       puts station.name
     end
+  end
+
+  def validate!
+    validate_not_empty(:stations, 'Stations')
+    raise clr('Starting and ending stations must be different!', 91) if @stations.first == @stations.last
   end
 end

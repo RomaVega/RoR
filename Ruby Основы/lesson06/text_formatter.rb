@@ -6,3 +6,7 @@ module TextFormatter
     "\e[#{color_code}m#{text}\e[0m"
   end
 end
+
+def red_error(message)
+  puts "#{clr(message, 31)}"
+end

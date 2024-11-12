@@ -1,7 +1,8 @@
-# frozen_string_literal: true
-
 require_relative 'wagon'
+require_relative 'validation'
 class CargoWagon < Wagon
+
+  include Validation
 
   def initialize
     @type = 'cargo'

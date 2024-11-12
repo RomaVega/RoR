@@ -1,8 +1,10 @@
+require_relative 'validation'
 class Station
   attr_reader :name, :trains, :stations
 
   include InstanceCounter
   include TextFormatter
+  include Validation
 
   # Класс переменная для хранения всех созданных станций
   @stations = []
