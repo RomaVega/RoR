@@ -7,21 +7,24 @@ class Station
   include Validation
 
   # Класс переменная для хранения всех созданных станций
-  @stations = []
+  @@stations = []
 
-  # Метод класса для доступа к @stations
+  # Метод класса для доступа к @@stations
   def self.all
-    @stations
+    @@stations
   end
 
   # Имеет название, которое указывается при ее создании:
   def initialize(station_name)
     @name = station_name
     @trains = []
+    # Проверяем уникальность станции и длинну имени
+    validate!
     # Добавляем текущий объект станции в список всех станций
     self.class.all << self
     # Увеличиваем счетчик при создании нового экземпляра
     register_instance
+    puts clr("\nStation #{name} created ✓", 32)
   end
 
   # Может принимать поезда (по одному за раз):
@@ -34,7 +37,7 @@ class Station
   # (по одному за раз, при этом, поезд удаляется из списка поездов, находящихся на станции):
   def dispatch(train)
     @trains.delete(train)
-    puts clr("\nTrain №#{train.number} dispatched from station #{@name} ×", 91)
+    puts "\nTrain №#{train.number} has dispatched from station #{@name}"
   end
 
   # Может возвращать список всех поездов на станции, находящиеся в текущий момент:
@@ -49,5 +52,17 @@ class Station
     trains_by_type = @trains.select { |train| train.type == type }
     puts clr("\nTrains on the station: #{@name}, type: '#{type}':", 37)
     trains_by_type.each { |train| puts "Train №#{train.number}" }
+  end
+
+  def validate!
+    validate_station_not_empty(:name, 'Station')
+    validate_station_length(:name, 'Station length', 3, 15)
+    raise StandardError, red_clr('This station already exists!') if station_exists?(@name)
+  end
+
+  private
+
+  def station_exists?(name)
+    self.class.all.any? { |station| station.name == name }
   end
 end

@@ -33,20 +33,22 @@ class Main
   end
 
   def create_station
-    name = prompt_station_name
-    return station_exists_message(name) if station_exists?(name)
-
-    add_station(name)
-    display_created_station(name)
-    list_all_stations
+      name = prompt_station_name
+      add_station(name)
+      display_created_station(name)
+    rescue StandardError => e
+      red_clr("Error: #{e.message}")
+      list_all_stations
   end
 
   def create_train
     number = prompt_train_number
     train_type = prompt_train_type
+    return puts red_clr("\nInvalid input!") unless %w[passenger cargo].include?(train_type)
+
     add_train(number, train_type)
-  rescue RuntimeError => e
-    red_error("\nError: #{e.message}")
+  rescue StandardError => e
+    red_clr("\nError: #{e.message}")
   end
 
   def manage_route
@@ -59,11 +61,9 @@ class Main
 
     first_station = prompt_for_station("\nPick the first station:")
     last_station = prompt_for_station("\nPick the last station:")
-    if last_station == first_station
-      puts "\nFirst station cannot be the same as the last station!"
-    else
-      @routes << Route.new(first_station, last_station)
-    end
+    @routes << Route.new(first_station, last_station)
+  rescue RuntimeError => e
+    red_clr("\nError: #{e.message}")
   end
 
   def add_station_to_route
@@ -200,7 +200,7 @@ class Main
       puts clr("\nTrain found ✓", 32)
       puts "№#{train.number}, Type: #{train.type}, Wagons: #{train.wagons.size}"
     else
-      puts clr("\nTrain with number #{train_number} not found ×", 91)
+      puts red_clr("\nTrain with number #{train_number} not found ×")
     end
   end
 
@@ -261,14 +261,6 @@ class Main
     gets.chomp.strip
   end
 
-  def station_exists_message(name)
-    puts "\nStation '#{name}' already exists!"
-  end
-
-  def station_exists?(name)
-    @stations.any? { |station| station.name == name }
-  end
-
   def add_station(name)
     @stations << Station.new(name)
   end
@@ -287,29 +279,27 @@ class Main
     puts "\nSelect a type of the train:"
     puts clr('1 - passenger train', 37)
     puts clr('2 - cargo train', 37)
-    gets.chomp.to_i
+    { 1 => 'passenger', 2 => 'cargo' }[gets.chomp.to_i]
   end
 
   def add_train(number, train_type)
-    raise clr('Invalid choice. Train was not created ×', 91) unless [1, 2].include? train_type
-
-    if train_type == 1
+    if train_type == 'passenger'
       create_passenger_train(number)
-    else
+    elsif train_type == 'cargo'
       create_cargo_train(number)
     end
   end
 
   def create_passenger_train(number)
     @trains << Train.new(number, 'passenger')
-    puts clr("\nPassenger train №#{number} created ✓", 32)
+    puts clr("Passenger train №#{number} created ✓", 32)
   rescue RuntimeError => e
     puts clr("Error: #{e.message}", 31)
   end
 
   def create_cargo_train(number)
     @trains << Train.new(number, 'cargo')
-    puts clr("\nCargo train №#{number} created ✓", 32)
+    puts clr("Cargo train №#{number} created ✓", 32)
   rescue RuntimeError => e
     puts clr("Error: #{e.message}", 31)
   end

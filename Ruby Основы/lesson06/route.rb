@@ -6,14 +6,22 @@ class Route
   include TextFormatter
   include Validation
 
+  @@all_routes = []
+
+  # Метод класса для хранения всех маршрутов
+  def self.all_routes
+    @@all_routes
+  end
   # Имеет начальную и конечную станцию, а также список промежуточных станций
   def initialize(first_station, last_station)
     @stations = [first_station, last_station]
-    puts clr("\nRoute from #{first_station.name} to #{last_station.name} created ✓", 32)
     # Увеличиваем счетчик при создании нового экземпляра
     register_instance
     # Проверяем уникальность маршрута, различие в начальной и конечной станциях
     validate!
+    # Добавляем маршрут в массив, если он прошёл проверку
+    @@all_routes << self
+    puts clr("\nRoute from #{first_station.name} to #{last_station.name} created ✓", 32)
   end
 
   # Добавляет промежуточную станцию в список
@@ -26,7 +34,7 @@ class Route
   def delete_station(station)
     if station != @stations.first && station != @stations.last && @stations.include?(station)
       @stations.delete(station)
-      puts clr("\nStation #{station.name} deleted from the route ×", 91)
+      puts red_clr("\nStation #{station.name} deleted from the route ×")
     end
   end
 
@@ -38,7 +46,16 @@ class Route
   end
 
   def validate!
-    validate_not_empty(:stations, 'Stations')
-    raise clr('Starting and ending stations must be different!', 91) if @stations.first == @stations.last
+    input_empty?(:stations, 'Station')
+    raise red_clr('Starting and ending stations must be different!') if @stations.first == @stations.last
+    raise red_clr('This route already exists!') if route_exists?
+  end
+
+  private
+
+  def route_exists?
+    self.class.all_routes.any? do |route|
+      route.stations.first == @stations.first && route.stations.last == @stations.last
+    end
   end
 end

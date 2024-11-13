@@ -70,7 +70,7 @@ class Train
     if @speed.zero?
       if @wagons.include?(wagon)
         @wagons.delete(wagon)
-        puts clr("\nWagon #{type} detached ×", 91)
+        puts red_clr("\nWagon #{type} detached ×")
         puts "Wagons total: #{@wagons.size}"
       else
         "\nSuch wagon is not found on this train!"
@@ -113,10 +113,9 @@ class Train
   private
 
   def validate!
-    puts
-    validate_not_empty(:number, 'Train number')
-    validate_length(:number, 'Train number', 5)
-    validate_inclusion(:type, 'Train type', %w[passenger cargo])
+    puts # \n - ни тут ни там не работают почему-то. Поэтому этот puts нет возможности убрать.
+    input_empty?(:number, 'Train number')
+    name_length(:number, 'Number length', 5)
   end
 
   # Метод сделан приватным так как используется только внутри класса для перемещения по маршруту.

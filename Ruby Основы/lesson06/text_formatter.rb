@@ -7,6 +7,6 @@ module TextFormatter
   end
 end
 
-def red_error(message)
-  puts "#{clr(message, 31)}"
+def red_clr(message)
+  clr(message, 91)
 end
