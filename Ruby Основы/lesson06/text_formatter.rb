@@ -8,5 +8,5 @@ module TextFormatter
 end
 
 def red_clr(message)
-  clr(message, 91)
+  puts clr(message, 91)
 end

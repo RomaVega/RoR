@@ -33,12 +33,11 @@ class Main
   end
 
   def create_station
-      name = prompt_station_name
-      add_station(name)
-      display_created_station(name)
-    rescue StandardError => e
-      red_clr("Error: #{e.message}")
-      list_all_stations
+    name = prompt_station_name
+    add_station(name)
+    list_all_stations
+  rescue StandardError => e
+    red_clr("\nError: #{e.message}")
   end
 
   def create_train
@@ -81,7 +80,7 @@ class Main
   def delete_station_from_route
     return puts "\nNo available routes. Create a route first!" if @routes.empty?
 
-    route = prompt_for_route('Select a route from which would you like to delete a station:')
+    route = prompt_for_route("\nSelect a route from which would you like to delete a station:")
     return unless route
 
     intermediate_stations = route.stations[1..-2]
@@ -265,13 +264,9 @@ class Main
     @stations << Station.new(name)
   end
 
-  def display_created_station(name)
-    puts clr("\nStation #{name} created ✓", 32)
-  end
-
   # create_train methods:
   def prompt_train_number
-    puts "\nWhat is the train number (5 characters)?"
+    puts "\nSet the train number \n(allowed formats: 333 3-33 LLL L-LL)"
     gets.chomp.strip
   end
 
@@ -369,7 +364,7 @@ class Main
       index = gets.chomp.to_i - 1
       return collection[index] if index >= 0 && index < collection.length
 
-      puts "\nInvalid choice. Please, chose a number from the list!"
+      puts red_clr("\nInvalid choice. Please, chose a number from the list!")
     end
   end
 

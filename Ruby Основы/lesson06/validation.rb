@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require_relative 'text_formatter'
 module Validation
 
   def valid?
@@ -11,13 +12,13 @@ module Validation
   def input_empty?(attribute, name)
     value = instance_variable_get("@#{attribute}")
     if value.nil? || value.empty?
-      raise red_clr("#{name} cannot be empty!")
+      raise StandardError, "#{name} cannot be empty!"
     end
   end
 
   def name_length(attribute, name, length)
     value = instance_variable_get("@#{attribute}")
-    raise red_clr("#{name} must be #{length} characters!") unless value.length == length
+    raise "#{name} must be #{length} characters!" unless value.length == length
   end
 
   def validate_train_type(type)
@@ -33,14 +34,14 @@ module Validation
   # Station validations:
   def validate_station_not_empty(attribute, name)
     value = instance_variable_get("@#{attribute}")
-    raise red_clr("#{name} cannot be empty!") if value.nil? || value.strip.empty?
+    raise red_clr("#{name} cannot be empty!").to_s if value.nil? || value.strip.empty?
   end
 
   def validate_station_length(attribute, name, min_length, max_length)
     value = instance_variable_get("@#{attribute}")
     length = value.length
     if length < min_length || length > max_length
-      raise red_clr("#{name} must be between #{min_length} and #{max_length} characters")
+      raise StandardError, "#{name} must be between #{min_length} and #{max_length} characters"
     end
   end
 
@@ -53,8 +54,4 @@ module Validation
     end
   end
 
-  #  def validate_type(attribute, name, klass)
-  #  value = instance_variable_get("@#{attribute}")
-  #  raise "#{name} must be #{klass} type!" unless value.is_a?(klass)
-  #  end
 end

@@ -1,4 +1,5 @@
 require_relative 'validation'
+require_relative 'text_formatter'
 class Route
   attr_reader :stations
 
@@ -47,8 +48,8 @@ class Route
 
   def validate!
     input_empty?(:stations, 'Station')
-    raise red_clr('Starting and ending stations must be different!') if @stations.first == @stations.last
-    raise red_clr('This route already exists!') if route_exists?
+    raise 'Starting and ending stations must be different!' if @stations.first == @stations.last
+    raise 'This route already exists!' if route_exists?
   end
 
   private

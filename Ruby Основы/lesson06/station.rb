@@ -1,4 +1,5 @@
 require_relative 'validation'
+require_relative 'text_formatter'
 class Station
   attr_reader :name, :trains, :stations
 
@@ -18,7 +19,7 @@ class Station
   def initialize(station_name)
     @name = station_name
     @trains = []
-    # Проверяем уникальность станции и длинну имени
+    # Проверяем уникальность станции и длину имени
     validate!
     # Добавляем текущий объект станции в список всех станций
     self.class.all << self
@@ -55,9 +56,9 @@ class Station
   end
 
   def validate!
-    validate_station_not_empty(:name, 'Station')
-    validate_station_length(:name, 'Station length', 3, 15)
-    raise StandardError, red_clr('This station already exists!') if station_exists?(@name)
+    input_empty?(:name, 'Station name')
+    validate_station_length(:name, 'Station name', 3, 15)
+    raise StandardError, 'This station already exists!' if station_exists?(@name)
   end
 
   private
