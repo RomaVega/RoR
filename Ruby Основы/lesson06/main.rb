@@ -38,6 +38,7 @@ class Main
     list_all_stations
   rescue StandardError => e
     red_clr("\nError: #{e.message}")
+    retry
   end
 
   def create_train
@@ -48,6 +49,7 @@ class Main
     add_train(number, train_type)
   rescue StandardError => e
     red_clr("\nError: #{e.message}")
+    retry
   end
 
   def manage_route
@@ -63,6 +65,7 @@ class Main
     @routes << Route.new(first_station, last_station)
   rescue RuntimeError => e
     red_clr("\nError: #{e.message}")
+    retry
   end
 
   def add_station_to_route

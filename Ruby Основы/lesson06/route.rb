@@ -16,10 +16,10 @@ class Route
   # Имеет начальную и конечную станцию, а также список промежуточных станций
   def initialize(first_station, last_station)
     @stations = [first_station, last_station]
-    # Увеличиваем счетчик при создании нового экземпляра
-    register_instance
     # Проверяем уникальность маршрута, различие в начальной и конечной станциях
     validate!
+    # Увеличиваем счетчик при создании нового экземпляра
+    register_instance
     # Добавляем маршрут в массив, если он прошёл проверку
     @@all_routes << self
     puts clr("\nRoute from #{first_station.name} to #{last_station.name} created ✓", 32)
