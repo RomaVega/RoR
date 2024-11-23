@@ -44,6 +44,7 @@ class Station
   # Может возвращать список всех поездов на станции, находящиеся в текущий момент:
   def list_all_trains
     @trains.each do |train|
+      yield train
       puts clr("Type: #{train.type}, wagons: #{train.wagons.size}", 37)
     end
   end
