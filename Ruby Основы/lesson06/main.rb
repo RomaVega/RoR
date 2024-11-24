@@ -113,7 +113,7 @@ class Main
   def add_wagon
     return puts "\nNo trains available. Create a train first!" if @trains.empty?
 
-    puts "\nSelect the train you would like to add a wagon:"
+    puts "\nSelect a train you would like to add a wagon to:"
     list_available_trains
     train = select_from_collection(@trains)
     wagon = if train.type == 'passenger'
@@ -388,7 +388,7 @@ class Main
 
   def list_available_trains
     @trains.each_with_index do |train, index|
-      puts clr("#{index + 1} - #{train.type} train, wagons: #{train.wagons.size}",37)
+      puts clr("#{index + 1} - #{train.type} train №#{train.number} wagons: #{train.wagons.size}",37)
     end
   end
 

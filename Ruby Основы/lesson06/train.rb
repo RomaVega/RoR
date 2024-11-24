@@ -60,7 +60,6 @@ class Train
     if @speed.zero?
       if wagon.type == @type
         @wagons << wagon
-        puts clr("\nWagon #{wagon.type} attached ✓", 32)
         puts "Wagons total: #{@wagons.size}"
       else
         puts "\nType of wagon doesnt match the type of the train!"
@@ -112,6 +111,12 @@ class Train
     else
       puts "\nTrain is already on the first station of the route!"
     end
+  end
+
+  def list_all_wagons(&block)
+    return to_enum(:list_all_wagons) unless block_given?
+
+    @wagons.each(&block)
   end
 
   private

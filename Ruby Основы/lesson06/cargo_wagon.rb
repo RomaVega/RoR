@@ -10,6 +10,7 @@ class CargoWagon < Wagon
   def initialize
     @type = 'cargo'
     @volume = 100
+    puts clr("\nWagon #{@type} with #{@volume}% free space added ✓", 32)
     super
   end
 

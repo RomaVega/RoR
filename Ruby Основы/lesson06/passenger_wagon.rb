@@ -10,6 +10,7 @@ class PassengerWagon < Wagon
   def initialize
     @type = 'passenger'
     @seats = 30
+    puts clr("\nWagon #{@type} with #{@seats} vacant seats added ✓", 32)
     super
   end
   
