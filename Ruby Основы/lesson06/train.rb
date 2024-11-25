@@ -60,7 +60,7 @@ class Train
     if @speed.zero?
       if wagon.type == @type
         @wagons << wagon
-        puts "Wagons total: #{@wagons.size}"
+        puts "\nWagons total: \e[5m#{@wagons.size}\e[0m"
       else
         puts "\nType of wagon doesnt match the type of the train!"
       end
@@ -113,10 +113,24 @@ class Train
     end
   end
 
-  def list_all_wagons(&block)
-    return to_enum(:list_all_wagons) unless block_given?
+  def list_passenger_wagons
+    @wagons.each_with_index do |wagon, index|
+      puts clr('────────────────────', 37)
+      puts clr("#{wagon.type.capitalize} wagon №#{index + 1}:", 37)
+      puts clr("Available seats: #{wagon.seats_available}", 37)
+      puts clr("Occupied seats: #{wagon.seats_occupied}", 37)
+    end
+    puts clr('────────────────────', 37)
+  end
 
-    @wagons.each(&block)
+  def list_cargo_wagons
+    @wagons.each_with_index do |wagon, index|
+      puts clr('────────────────────', 37)
+      puts clr("#{wagon.type.capitalize} wagon №#{index + 1}:", 37)
+      puts clr("Available volume: #{wagon.available_volume}", 37)
+      puts clr("Occupied volume: #{wagon.occupied_volume}", 37)
+    end
+    puts clr('────────────────────', 37)
   end
 
   private

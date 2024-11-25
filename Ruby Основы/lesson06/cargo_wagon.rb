@@ -8,22 +8,40 @@ class CargoWagon < Wagon
   include TextFormatter
 
   def initialize
-    @type = 'cargo'
-    @volume = 100
-    puts clr("\nWagon #{@type} with #{@volume}% free space added ✓", 32)
     super
+    @type = 'cargo'
+    @volume_total = []
+    @volume_occupied = []
+    @volume_available = []
+    puts clr("\nWagon #{@type} with #{@volume} volume added ✓", 32)
   end
 
-  def load(amount)
-    @volume -= amount
-    puts "Loaded volume: #{amount}"
+  def set_volume
+    puts "\nSet volume for this cargo wagon (1-100):"
+    volume = gets.chomp.to_i
+    validate_cargo_volume(volume)
+    @volume_total = volume
+    @volume_occupied = 0
+    @volume_available = volume
+    puts clr("\nCargo wagon volume set to: #{@volume_total} ✓", 32)
+    self # Возвращаем объект
+  rescue ArgumentError => e
+    print red_clr("\n#{e}")
+    retry
+  end
+
+  def load_volume(amount)
+    @volume_occupied += amount
+    @volume_available = @volume_total - amount
+
+    puts "\nLoaded volume: #{@volume_occupied}. Volume available: #{@volume_available}"
   end
   
   def available_volume
-    puts "Available volume: #{@volume}"
+    @volume_available
   end
 
   def occupied_volume
-    puts "Occupied volume: #{100 - @volume}"
+    @volume_occupied
   end
 end

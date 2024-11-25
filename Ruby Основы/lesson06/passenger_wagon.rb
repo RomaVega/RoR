@@ -8,21 +8,39 @@ class PassengerWagon < Wagon
   include TextFormatter
 
   def initialize
-    @type = 'passenger'
-    @seats = 30
-    puts clr("\nWagon #{@type} with #{@seats} vacant seats added ✓", 32)
     super
+    @type = 'passenger'
+    @seats_total = []
+    @seats_occupied = []
+    @seats_available = []
+    puts clr("\nWagon #{@type} with #{@seats} seats added ✓", 32)
+  end
+
+  def set_seats
+    puts "\nSet number of seats for this passenger wagon (30, 35 or 50):"
+    seats = gets.chomp.to_i
+    validate_passenger_volume(seats)
+    @seats_total = seats
+    @seats_occupied = 0
+    @seats_available = seats
+    puts clr("\nNumber of total seats set to: #{@seats_total} ✓", 32)
+    self # Возвращаем объект
+  rescue ArgumentError => e
+    print red_clr("\n#{e}")
+    retry
   end
   
   def take_seat
-    puts "One seat in wagon #{self} is taken. #{@seats -= 1} seats left."
+    @seats_available = @seats_total -= 1
+    @seats_occupied += 1
+    puts "\nOne seat in wagon #{self} is taken. #{@seats_available} available seats left."
   end
 
   def seats_occupied
-    puts "Occupied seat(s): #{30 - @seats}"
+    @seats_occupied
   end
 
   def seats_available
-    puts "Available seat(s): #{@seats}"
+    @seats_available
   end
 end

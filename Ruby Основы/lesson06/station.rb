@@ -43,11 +43,8 @@ class Station
 
   # Может возвращать список всех поездов на станции, находящиеся в текущий момент:
   def list_all_trains
-    return to_enum(:list_all_trains) unless block_given? # Возвращаем Enumerator, если блока нет
-
-    @trains.each do |train|
-      yield train
-      puts clr("Type: #{train.type}, wagons: #{train.wagons.size}", 37)
+    @trains.each_with_index do |train, index|
+      puts clr("#{index + 1} - Train №#{train.number}, number of wagons: #{train.wagons.size}", 37)
     end
   end
 

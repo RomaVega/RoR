@@ -53,5 +53,17 @@ module Validation
       raise ArgumentError, red_clr("#{name} must be #{length_min}-#{length_max} characters")
     end
   end
+  
+  def validate_cargo_volume(value)
+    if value < 1 || value > 100
+      raise ArgumentError, 'Cargo volume must be between 1 and 100!'
+    end
+  end
+
+  def validate_passenger_volume(seats)
+    unless [30, 35, 50].include?(seats)
+      raise ArgumentError, 'Number of seats must be 30, 35 or 50!'
+    end
+  end
 
 end

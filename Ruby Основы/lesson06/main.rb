@@ -117,9 +117,9 @@ class Main
     list_available_trains
     train = select_from_collection(@trains)
     wagon = if train.type == 'passenger'
-              PassengerWagon.new
+              PassengerWagon.new.set_seats
             elsif train.type == 'cargo'
-              CargoWagon.new
+              CargoWagon.new.set_volume
             else
               puts "\nPick from the list!"
               return
@@ -159,18 +159,15 @@ class Main
     end
   end
 
-  def list_stations_and_trains
+  def list_stations_trains_wagons
     return puts "\nNo stations found. Create a station or a route first!" if @stations.empty?
-
-    puts "\nList of all stations with number of trains on each:"
-    @stations.each_with_index do |station, index|
-      puts clr("#{index + 1} - #{station.name}, number of trains: #{station.trains.size}", 37)
-    end
-    puts "\nPick any station to see the list of trains parked on it:"
-
-    station = select_from_collection(@stations)
-    puts "\nList of trains parked on the station #{station.name}:"
-    station.list_all_trains
+    
+    list_stations_with_trains
+    station = prompt_for_station_with_trains
+    puts "\nPick any train to see it's list of wagons:"
+    trains = station.list_all_trains
+    train = select_from_collection(trains)
+    list_passenger_or_cargo_wagons(train)
   end
 
   def set_get_manufacturer
@@ -205,6 +202,18 @@ class Main
       puts red_clr("\nTrain with number #{train_number} not found ×")
     end
   end
+  
+  def occupy_load_wagons
+    return puts "\nNo trains available. Create a train first!" if @trains.empty?
+
+    list_available_trains
+    puts "\nPick any train to see it's list of wagons:"
+    train = select_from_collection(@trains)
+    list_passenger_or_cargo_wagons(train)
+    puts "\nWhich wagon would you like to load / occupy?"
+    wagon = select_from_collection(train)
+    wagon.take_seat
+  end
 
   private
 
@@ -231,9 +240,10 @@ class Main
       'add wagons to the train',
       'detach wagons from the train',
       'move train along the route',
-      'list stations / trains on stations',
+      'list stations / trains / wagons',
       'set / get manufacturer name',
-      'find a train by its number'
+      'find a train by its number',
+      'occupy seats / load wagons'
     ]
     menu_items.each_with_index do |item, index|
       puts clr("#{index + 1} - #{item}", 97)
@@ -249,9 +259,10 @@ class Main
     when 5 then add_wagon
     when 6 then detach_wagon
     when 7 then move_train
-    when 8 then list_stations_and_trains
+    when 8 then list_stations_trains_wagons
     when 9 then set_get_manufacturer
     when 10 then find_train_by_number
+    when 11 then occupy_load_wagons
     else
       puts "\nInvalid number. Enter a number from the menu!"
     end
@@ -388,7 +399,7 @@ class Main
 
   def list_available_trains
     @trains.each_with_index do |train, index|
-      puts clr("#{index + 1} - #{train.type} train №#{train.number} wagons: #{train.wagons.size}",37)
+      puts clr("#{index + 1} - #{train.type.capitalize} train №#{train.number}, wagons: #{train.wagons.size}", 37)
     end
   end
 
@@ -422,6 +433,27 @@ class Main
   def list_available_stations(stations)
     stations.each_with_index do |station, index|
       puts clr("#{index + 1} - #{station.name}",37)
+    end
+  end
+  
+  def list_stations_with_trains
+    puts "\nList of all stations with number of trains on each:"
+    @stations.each_with_index do |station, index|
+      puts clr("#{index + 1} - Station '#{station.name}', number of trains: #{station.trains.size}", 37)
+    end
+  end
+  
+  def prompt_for_station_with_trains
+    puts "\nPick any station to see the list of trains and wagons parked at it:"
+    select_from_collection(@stations)
+  end
+
+  def list_passenger_or_cargo_wagons(train)
+    puts "\n#{train.type.capitalize} train №#{train.number} wagons:"
+    if train.type == 'passenger'
+      train.list_passenger_wagons
+    elsif train.type == 'cargo'
+      train.list_cargo_wagons
     end
   end
 
