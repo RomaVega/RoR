@@ -160,8 +160,8 @@ class Main
   end
 
   def list_stations_trains_wagons
-    return puts "\nNo stations found. Create a station or a route first!" if @stations.empty?
-    
+    return puts "\nCreate some stations, a train and assign at least one route first!" if @stations.empty? || @routes.empty?
+
     list_stations_with_trains
     station = prompt_for_station_with_trains
     puts "\nPick any train to see it's list of wagons:"
@@ -202,17 +202,21 @@ class Main
       puts red_clr("\nTrain with number #{train_number} not found ×")
     end
   end
-  
+
   def occupy_load_wagons
     return puts "\nNo trains available. Create a train first!" if @trains.empty?
 
-    list_available_trains
     puts "\nPick any train to see it's list of wagons:"
+    list_available_trains
     train = select_from_collection(@trains)
     list_passenger_or_cargo_wagons(train)
-    puts "\nWhich wagon would you like to load / occupy?"
-    wagon = select_from_collection(train)
-    wagon.take_seat
+    wagon = train.select_wagon
+
+    if wagon.type == 'passenger'
+      wagon.take_seat
+    elsif wagon.type == 'cargo'
+      wagon.load_volume
+    end
   end
 
   private
@@ -435,21 +439,21 @@ class Main
       puts clr("#{index + 1} - #{station.name}",37)
     end
   end
-  
+
   def list_stations_with_trains
     puts "\nList of all stations with number of trains on each:"
     @stations.each_with_index do |station, index|
       puts clr("#{index + 1} - Station '#{station.name}', number of trains: #{station.trains.size}", 37)
     end
   end
-  
+
   def prompt_for_station_with_trains
     puts "\nPick any station to see the list of trains and wagons parked at it:"
     select_from_collection(@stations)
   end
 
   def list_passenger_or_cargo_wagons(train)
-    puts "\n#{train.type.capitalize} train №#{train.number} wagons:"
+    puts "\n#{train.type.capitalize} train №#{train.number}:"
     if train.type == 'passenger'
       train.list_passenger_wagons
     elsif train.type == 'cargo'
@@ -460,5 +464,3 @@ class Main
 end
 main = Main.new
 main.main_menu
-cargo_wagon = CargoWagon.new
-puts cargo_wagon.inspect

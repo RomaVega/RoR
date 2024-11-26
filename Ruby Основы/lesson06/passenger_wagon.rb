@@ -17,7 +17,7 @@ class PassengerWagon < Wagon
   end
 
   def set_seats
-    puts "\nSet number of seats for this passenger wagon (30, 35 or 50):"
+    puts "\nSet number of seats for this passenger wagon (33, 55 or 77):"
     seats = gets.chomp.to_i
     validate_passenger_volume(seats)
     @seats_total = seats
@@ -33,7 +33,8 @@ class PassengerWagon < Wagon
   def take_seat
     @seats_available = @seats_total -= 1
     @seats_occupied += 1
-    puts "\nOne seat in wagon #{self} is taken. #{@seats_available} available seats left."
+    puts clr("\nOne seat is taken ✓", 32)
+    puts "\nAvailable seats left: #{@seats_available}"
   end
 
   def seats_occupied

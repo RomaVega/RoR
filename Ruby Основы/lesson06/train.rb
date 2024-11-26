@@ -116,9 +116,11 @@ class Train
   def list_passenger_wagons
     @wagons.each_with_index do |wagon, index|
       puts clr('────────────────────', 37)
-      puts clr("#{wagon.type.capitalize} wagon №#{index + 1}:", 37)
+      puts clr("#{wagon.type.capitalize} wagon №#{index + 1}", 37)
       puts clr("Available seats: #{wagon.seats_available}", 37)
       puts clr("Occupied seats: #{wagon.seats_occupied}", 37)
+      # current_wagon_index = index + 1
+      #  @wagons(wagon) << current_wagon_index
     end
     puts clr('────────────────────', 37)
   end
@@ -126,11 +128,24 @@ class Train
   def list_cargo_wagons
     @wagons.each_with_index do |wagon, index|
       puts clr('────────────────────', 37)
-      puts clr("#{wagon.type.capitalize} wagon №#{index + 1}:", 37)
+      puts clr("#{wagon.type.capitalize} wagon №#{index + 1}", 37)
       puts clr("Available volume: #{wagon.available_volume}", 37)
       puts clr("Occupied volume: #{wagon.occupied_volume}", 37)
     end
     puts clr('────────────────────', 37)
+  end
+
+  def select_wagon
+    return puts red_clr('This train has no wagons attached!') if @wagons.empty?
+
+    loop do
+      puts "\nWhich wagon would you like to load / occupy? (1-#{@wagons.size}):"
+      input = gets.chomp.to_i
+
+      return @wagons[input - 1] if input.between?(1, @wagons.size)
+
+      puts red_clr("\nInvalid choice. Select a valid wagon number!")
+    end
   end
 
   private

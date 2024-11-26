@@ -60,8 +60,16 @@ module Validation
     end
   end
 
+  def validate_loading_input(amount)
+    if amount <= 0
+      raise ArgumentError, 'Loading amount must be greater than 0!'
+    elsif amount > @volume_available
+      raise ArgumentError, "Loading amount must be less than or equal to #{@volume_available}"
+    end
+  end
+
   def validate_passenger_volume(seats)
-    unless [30, 35, 50].include?(seats)
+    unless [33, 55, 70].include?(seats)
       raise ArgumentError, 'Number of seats must be 30, 35 or 50!'
     end
   end

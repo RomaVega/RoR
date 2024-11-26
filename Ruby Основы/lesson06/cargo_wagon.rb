@@ -30,11 +30,17 @@ class CargoWagon < Wagon
     retry
   end
 
-  def load_volume(amount)
+  def load_volume
+    puts "\nHow much do you want to load on this wagon (1-#{@volume_available})?"
+    amount = gets.chomp.to_i
+    validate_loading_input(amount)
     @volume_occupied += amount
     @volume_available = @volume_total - amount
-
-    puts "\nLoaded volume: #{@volume_occupied}. Volume available: #{@volume_available}"
+    puts clr("\nVolume loaded ✓", 32)
+    puts "\nVolume available: #{@volume_available}"
+  rescue ArgumentError => e
+    print red_clr("\n#{e}")
+    retry
   end
   
   def available_volume
