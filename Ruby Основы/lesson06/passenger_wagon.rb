@@ -13,7 +13,6 @@ class PassengerWagon < Wagon
     @seats_total = []
     @seats_occupied = []
     @seats_available = []
-    puts clr("\nWagon #{@type} with #{@seats} seats added ✓", 32)
   end
 
   def set_seats
@@ -23,7 +22,7 @@ class PassengerWagon < Wagon
     @seats_total = seats
     @seats_occupied = 0
     @seats_available = seats
-    puts clr("\nNumber of total seats set to: #{@seats_total} ✓", 32)
+    puts clr("\nPassenger wagon added and number of total seats set to: #{@seats_total} ✓", 32)
     self # Возвращаем объект
   rescue ArgumentError => e
     print red_clr("\n#{e}")

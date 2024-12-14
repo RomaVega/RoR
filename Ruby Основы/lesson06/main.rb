@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'byebug'
 require_relative 'text_formatter'
 require_relative 'instance_counter'
 require_relative 'station'
@@ -23,9 +24,24 @@ class Main
     @routes = []
   end
 
+  MENU = {
+    'create a station' => 'create_station',
+    'create a train' => 'create_train',
+    'create a route / add / delete stations' => 'manage_route',
+    'assign a route to the train' => 'assign_route',
+    'add wagons to the train' => 'add_wagon',
+    'detach wagons from the train' => 'detach_wagons',
+    'move train along the route' => 'move_train',
+    'list stations / trains / wagons' => 'list_stations_trains_wagons',
+    'set / get manufacturer name' => 'set_get_manufacturer',
+    'find a train by its number' => 'find_train_by_number',
+    'occupy seats / load wagons' => 'occupy_load_wagons'
+  }.freeze
+
+
   def main_menu
     loop do
-      display_total_stations_trains_routes
+      display_totals
       show_menu
       choice = get_choice
       take_action(choice)
@@ -69,9 +85,7 @@ class Main
   end
 
   def add_station_to_route
-    return puts "\nNo routes available. Create a route first!" if @routes.empty?
-    return puts "\nNo stations available to add. \nCreate another station first!" if @stations.size < 3
-
+    ensure_routes_and_stations_exist
     route = prompt_for_route("\nChose a route to which would you like to add a station:")
     puts "\nPick a station you would like to add to the route:"
     available_stations = @stations - [route.stations.first, route.stations.last]
@@ -86,28 +100,17 @@ class Main
     route = prompt_for_route("\nSelect a route from which would you like to delete a station:")
     return unless route
 
-    intermediate_stations = route.stations[1..-2]
-    if intermediate_stations.empty?
-      puts "\nNo intermediate stations to delete on this route."
-    else
-      station = prompt_for_station_to_delete(intermediate_stations)
-      route.delete_station(station)
-    end
+    delete_intermediate_station(route)
   end
 
   def assign_route
-    return puts "\nNo trains available. Create a train first!" if @trains.empty?
-    return puts "\nNo routes available. Create a route first!" if @routes.empty?
-
+    ensure_routes_and_stations_exist
     puts "\nSelect a train you would like to assign a route to:"
     list_available_trains
     train = select_from_collection(@trains)
     puts "\nChose a route you want to assign to the train №#{train.number}:"
     list_all_routes
-    route = select_from_collection(@routes)
-    puts clr("\nRoute from #{route.stations.first.name} to #{route.stations.last.name} assigned to:", 32)
-    puts clr("#{train.type.capitalize} train №#{train.number} ✓", 32)
-    train.accept_route(route)
+    select_route(train)
   end
 
   def add_wagon
@@ -116,18 +119,11 @@ class Main
     puts "\nSelect a train you would like to add a wagon to:"
     list_available_trains
     train = select_from_collection(@trains)
-    wagon = if train.type == 'passenger'
-              PassengerWagon.new.set_seats
-            elsif train.type == 'cargo'
-              CargoWagon.new.set_volume
-            else
-              puts "\nPick from the list!"
-              return
-            end
+    wagon = attach_wagon(train)
     train.add_wagon(wagon)
   end
 
-  def detach_wagon
+  def detach_wagons
     return puts "\nNo trains available. Create the train first!" if @trains.empty?
 
     puts "\nPick the train from which would you like to detach a wagon:"
@@ -136,7 +132,7 @@ class Main
     return puts "\nNo wagons to detach. Add wagons first!" if train_choice.wagons.empty?
 
     last_wagon = train_choice.wagons.last
-    train_choice.detach_wagons(last_wagon)
+    train_choice.detach_wagon(last_wagon)
   end
 
   def move_train
@@ -147,20 +143,13 @@ class Main
     train = select_from_collection(@trains)
     return puts "\nTrain cannot move without assigned route. Assign the route to this train first!" if train.route.nil?
 
-    puts "\nWould you like to go forward or backward?"
-    puts clr('1 - move backward', 37)
-    puts clr('2 - move forward', 37)
-    direction_choice = gets.chomp.to_i
-    case direction_choice
-    when 1 then train.move_backward
-    when 2 then train.move_forward
-    else
-      puts "\nWrong choice!"
-    end
+    direction_choice(train)
   end
 
   def list_stations_trains_wagons
-    return puts "\nCreate some stations, a train and assign at least one route first!" if @stations.empty? || @routes.empty?
+    if @stations.empty? || @routes.empty?
+      return puts "\nCreate some stations, a train and assign at least one route first!"
+    end
 
     list_stations_with_trains
     station = prompt_for_station_with_trains
@@ -176,17 +165,7 @@ class Main
     puts "\nWould you like to set the manufacturer name or display it?"
     puts clr('1 - set', 37)
     puts clr('2 - display', 37)
-    set_or_get_user_choice = gets.chomp.to_i
-    case set_or_get_user_choice
-    when 1
-      puts "\nSelect a train to set its manufacturer:"
-      list_available_trains
-      train = select_from_collection(@trains)
-      train.set_manufacturer
-    when 2 then get_manufacturer
-    else
-      puts "\nWrong choice!"
-    end
+    set_or_get_manufacturer
   end
 
   def find_train_by_number
@@ -194,13 +173,7 @@ class Main
 
     puts "\nEnter the train number you want to find:"
     train_number = gets.chomp.strip
-    train = Train.find(train_number)
-    if train
-      puts clr("\nTrain found ✓", 32)
-      puts "№#{train.number}, Type: #{train.type}, Wagons: #{train.wagons.size}"
-    else
-      puts red_clr("\nTrain with number #{train_number} not found ×")
-    end
+    find_train(train_number)
   end
 
   def occupy_load_wagons
@@ -211,17 +184,12 @@ class Main
     train = select_from_collection(@trains)
     list_passenger_or_cargo_wagons(train)
     wagon = train.select_wagon
-
-    if wagon.type == 'passenger'
-      wagon.take_seat
-    elsif wagon.type == 'cargo'
-      wagon.load_volume
-    end
+    select_and_fill(wagon)
   end
 
   private
 
-  def display_total_stations_trains_routes
+  def display_totals
     puts "\n┌───────────────────┐"
     puts "│ Stations total: \e[5m#{Station.instances}\e[0m │"
     puts "│ Trains total: \e[5m#{Train.instances}\e[0m   │"
@@ -236,37 +204,15 @@ class Main
 
   def show_menu
     puts clr("\n        \e[1mMENU\e[0m\n", 36)
-    menu_items = [
-      'create a station',
-      'create a train',
-      'create a route / add / delete stations',
-      'assign a route to the train',
-      'add wagons to the train',
-      'detach wagons from the train',
-      'move train along the route',
-      'list stations / trains / wagons',
-      'set / get manufacturer name',
-      'find a train by its number',
-      'occupy seats / load wagons'
-    ]
-    menu_items.each_with_index do |item, index|
+    MENU.each_with_index do |(item, _method), index|
       puts clr("#{index + 1} - #{item}", 97)
     end
   end
 
   def take_action(choice)
-    case choice
-    when 1 then create_station
-    when 2 then create_train
-    when 3 then manage_route
-    when 4 then assign_route
-    when 5 then add_wagon
-    when 6 then detach_wagon
-    when 7 then move_train
-    when 8 then list_stations_trains_wagons
-    when 9 then set_get_manufacturer
-    when 10 then find_train_by_number
-    when 11 then occupy_load_wagons
+    if choice.between?(1, MENU.size)
+      selected_method = MENU.values[choice - 1]
+      send(selected_method)
     else
       puts "\nInvalid number. Enter a number from the menu!"
     end
@@ -396,7 +342,6 @@ class Main
     loop do
       index = gets.chomp.to_i - 1
       return intermediate_elements[index] if index >= 0 && index < intermediate_elements.length
-
       puts "\nInvalid choice. Please, chose a number from the list!"
     end
   end
@@ -459,6 +404,86 @@ class Main
     elsif train.type == 'cargo'
       train.list_cargo_wagons
     end
+  end
+
+  def attach_wagon(train)
+    if train.type == 'passenger'
+      PassengerWagon.new.set_seats
+    elsif train.type == 'cargo'
+      CargoWagon.new.set_volume
+    else
+      puts "\nPick from the list!"
+      nil
+    end
+  end
+
+  def direction_choice(train)
+    puts "\nWould you like to go forward or backward?"
+    puts clr('1 - move backward', 37)
+    puts clr('2 - move forward', 37)
+    direction_choice = gets.chomp.to_i
+    case direction_choice
+    when 1 then train.move_backward
+    when 2 then train.move_forward
+    else
+      puts "\nWrong choice!"
+    end
+  end
+
+  def delete_intermediate_station(route)
+    intermediate_stations = route.stations[1..-2]
+    if intermediate_stations.empty?
+      puts "\nNo intermediate stations to delete on this route."
+    else
+      station = prompt_for_station_to_delete(intermediate_stations)
+      route.delete_station(station)
+    end
+  end
+
+  def select_route(train)
+    route = select_from_collection(@routes)
+    puts clr("\nRoute from #{route.stations.first.name} to #{route.stations.last.name} assigned to:", 32)
+    puts clr("#{train.type.capitalize} train №#{train.number} ✓", 32)
+    train.accept_route(route)
+  end
+
+  def set_or_get_manufacturer
+    set_or_get_user_choice = gets.chomp.to_i
+    case set_or_get_user_choice
+    when 1
+      puts "\nSelect a train to set its manufacturer:"
+      list_available_trains
+      train = select_from_collection(@trains)
+      train.set_manufacturer
+    when 2 then get_manufacturer
+    else
+      puts "\nWrong choice!"
+    end
+  end
+
+  def find_train(train_number)
+    train = Train.find(train_number)
+    if train
+      puts clr("\nTrain found ✓", 32)
+      puts "№#{train.number}, Type: #{train.type}, Wagons: #{train.wagons.size}"
+    else
+      puts red_clr("\nTrain with number #{train_number} not found ×")
+    end
+  end
+
+  def select_and_fill(wagon)
+    if wagon.type == 'passenger'
+      wagon.take_seat
+    elsif wagon.type == 'cargo'
+      wagon.load_volume
+    end
+  rescue NoMethodError => e
+    puts red_clr('No wagon to fill. Attach a wagon first!')
+  end
+
+  def ensure_routes_and_stations_exist
+    return puts "\nNo routes available. Create a route first!" if @routes.empty?
+    return puts "\nNo stations available to add. \nCreate another station first!" if @stations.size < 3
   end
 
 end

@@ -69,7 +69,7 @@ class Train
     end
   end
 
-  def detach_wagons(wagon)
+  def detach_wagon(wagon)
     if @speed.zero?
       if @wagons.include?(wagon)
         @wagons.delete(wagon)
@@ -136,16 +136,14 @@ class Train
   end
 
   def select_wagon
-    return puts red_clr('This train has no wagons attached!') if @wagons.empty?
+    return 'No wagons found. Add at least one wagon first!' if @wagons.empty?
 
-    loop do
-      puts "\nWhich wagon would you like to load / occupy? (1-#{@wagons.size}):"
-      input = gets.chomp.to_i
+    puts "\nWhich wagon would you like to load / occupy? (1-#{@wagons.size}):"
+    input = gets.chomp.to_i
 
-      return @wagons[input - 1] if input.between?(1, @wagons.size)
+    return @wagons[input - 1] if input.between?(1, @wagons.size)
 
-      puts red_clr("\nInvalid choice. Select a valid wagon number!")
-    end
+    puts red_clr("\nInvalid choice. Select a valid wagon number!")
   end
 
   private
