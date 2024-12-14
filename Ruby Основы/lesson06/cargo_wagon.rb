@@ -13,7 +13,6 @@ class CargoWagon < Wagon
     @volume_total = []
     @volume_occupied = []
     @volume_available = []
-    puts clr("\nWagon #{@type} with #{@volume} volume added ✓", 32)
   end
 
   def set_volume
@@ -23,7 +22,7 @@ class CargoWagon < Wagon
     @volume_total = volume
     @volume_occupied = 0
     @volume_available = volume
-    puts clr("\nCargo wagon volume set to: #{@volume_total} ✓", 32)
+    puts clr("\nCargo wagon added and volume set to: #{@volume_total} ✓", 32)
     self # Возвращаем объект
   rescue ArgumentError => e
     print red_clr("\n#{e}")

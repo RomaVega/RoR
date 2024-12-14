@@ -69,8 +69,8 @@ module Validation
   end
 
   def validate_passenger_volume(seats)
-    unless [33, 55, 70].include?(seats)
-      raise ArgumentError, 'Number of seats must be 30, 35 or 50!'
+    unless [33, 55, 77].include?(seats)
+      raise ArgumentError, 'Number of seats must be 33, 55 or 77!'
     end
   end
 
