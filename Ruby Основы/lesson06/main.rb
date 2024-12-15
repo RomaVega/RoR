@@ -27,7 +27,7 @@ class Main
   MENU = {
     'create a station' => 'create_station',
     'create a train' => 'create_train',
-    'create a route / add / delete stations' => 'manage_route',
+    'create new route / add / delete stations' => 'manage_route',
     'assign a route to the train' => 'assign_route',
     'add wagons to the train' => 'add_wagon',
     'detach wagons from the train' => 'detach_wagons',
@@ -73,8 +73,8 @@ class Main
     process_route_management_option(user_choice)
   end
 
-  def create_a_route
-    return puts "\nAt least 2 stations are required to create a route. Create some stations!" if @stations.size < 2
+  def create_new_route
+    return puts "\nAt least 2 stations are required to create new route. Create some stations!" if @stations.size < 2
 
     first_station = prompt_for_station("\nPick the first station:")
     last_station = prompt_for_station("\nPick the last station:")
@@ -266,7 +266,7 @@ class Main
   # manage_route methods:
   def prompt_route_managing_options
     puts "\nSelect an action:"
-    puts clr('1 - create a route', 37)
+    puts clr('1 - create new route', 37)
     puts clr('2 - add a station to the route', 37)
     puts clr('3 - delete a station from the route', 37)
     gets.chomp.to_i
@@ -274,7 +274,7 @@ class Main
 
   def process_route_management_option(user_choice)
     case user_choice
-    when 1 then create_a_route
+    when 1 then create_new_route
     when 2 then add_station_to_route
     when 3 then delete_station_from_route
     else
@@ -282,7 +282,7 @@ class Main
     end
   end
 
-  # create_a_route methods:
+  # create_new_route methods:
   def prompt_for_station(message)
     puts "\n#{message}"
     list_stations_with_index
@@ -301,20 +301,20 @@ class Main
   end
 
   # delete_station_from_route methods:
-  def prompt_for_route(message)
-    puts "#{message}"
-    list_routes_with_index
-    selected_route = select_from_collection(@routes)
-    puts "\nInvalid route selection!" unless selected_route
-    selected_route
-  end
-
   def prompt_for_station_to_delete(stations)
     puts "\nSelect the station you would like to delete:"
     list_available_stations(stations)
     selected_station = select_from_collection(stations)
     puts "\nInvalid station selection!" unless selected_station
     selected_station
+  end
+
+  def prompt_for_route(message)
+    puts "#{message}"
+    list_routes_with_index
+    selected_route = select_from_collection(@routes)
+    puts "\nInvalid route selection!" unless selected_route
+    selected_route
   end
 
   # lists and selectors:
