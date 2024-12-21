@@ -9,14 +9,23 @@ require_relative 'wagon'
 require_relative 'cargo_wagon'
 require_relative 'passenger_wagon'
 require_relative 'validation'
+require_relative 'accessor'
 
 # Main class that provides the core CLI functionality
 class Main
-  attr_accessor :stations
+  extend Accessors
 
   include Manufacturer
   include TextFormatter
   include Validation
+
+  attr_accessor :stations
+
+  # Example attr_accessor_with_history
+  attr_accessor_with_history :test_attr
+
+  # Example strong_attr_accessor
+  strong_attr_accessor :strict_value, String
 
   def initialize
     @stations = []
@@ -25,6 +34,7 @@ class Main
   end
 
   MENU = {
+    'test accessors' => 'test_new_accessors',
     'create a station' => 'create_station',
     'create a train' => 'create_train',
     'create new route / add / delete stations' => 'manage_route',
@@ -38,6 +48,24 @@ class Main
     'occupy seats / load wagons' => 'occupy_load_wagons'
   }.freeze
 
+  def test_new_accessors
+    puts "\nTesting Accessors..."
+
+    # Test attr_accessor_with_history
+    self.test_attr = 1
+    self.test_attr = 2
+    self.test_attr = 3
+    puts "History of test_attr: #{test_attr_history.inspect}" # => [1, 2]
+
+    # test strong_attr_accessor
+    begin
+      self.strict_value = "Valid string"
+      puts "strict_value: #{strict_value}" # => "Valid string"
+      self.strict_value = 42 # => Ошибка
+    rescue TypeError => e
+      puts "Error: #{e.message}"
+    end
+  end
 
   def main_menu
     loop do

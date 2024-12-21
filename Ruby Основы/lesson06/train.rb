@@ -1,10 +1,10 @@
+require_relative 'validation'
 require_relative 'route'
 require_relative 'station'
 require_relative 'wagon'
 require_relative 'cargo_wagon'
 require_relative 'passenger_wagon'
 require_relative 'manufacturer'
-require_relative 'validation'
 require_relative 'text_formatter'
 
 class Train
@@ -16,6 +16,10 @@ class Train
   include InstanceCounter
   include TextFormatter
   include Validation
+
+  validate :number, :presence
+  validate :number, :format, NUMBER_FORMAT
+  validate :type, :type, String
 
   # Класс переменная для хранения всех созданных поездов
   @trains = []
@@ -147,12 +151,6 @@ class Train
   end
 
   private
-
-  def validate!
-    puts # \n - ни тут ни там не работают почему-то. Поэтому этот puts нет возможности убрать.
-    input_empty?(:number, 'Train number')
-    raise 'Invalid format! Should be: 3-33, 333, LLL or L-LL' if @number !~ NUMBER_FORMAT
-  end
 
   # Метод сделан приватным так как используется только внутри класса для перемещения по маршруту.
   def previous_station
